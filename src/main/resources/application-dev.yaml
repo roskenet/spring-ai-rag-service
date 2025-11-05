@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spring_ai_rag_dev
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  ai:
+    openai:
+      chat:
+        options:
+          max-tokens: 2048
+          temperature: 0.7
+
+logging:
+  level:
+    org.springframework.ai: TRACE
+    com.zalando.rag: TRACE
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

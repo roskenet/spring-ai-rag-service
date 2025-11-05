@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: zeos-rag-test
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  ai:
+    openai:
+      api-key: dummy-key-for-tests
+      base-url: http://localhost:8080/mock-api
+
+logging:
+  level:
+    org.springframework.ai: WARN
+    com.zalando.rag: INFO

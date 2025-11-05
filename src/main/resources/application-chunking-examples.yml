@@ -1,0 +1,214 @@
+# Example configuration for extensible chunking strategies
+# This file demonstrates various chunking configurations that can be used
+# in your application.yml file.
+
+# Basic chunking configuration
+rag:
+  chunking:
+    # Default strategy to use when none is specified
+    default-strategy: intelligent
+
+    # Global defaults that apply to all strategies unless overridden
+    global:
+      min-chunk-size: 200
+      max-chunk-size: 2000
+      preferred-chunk-size: 800
+      overlap-size: 100
+      preserve-code-blocks: true
+      maintain-sentence-boundaries: true
+      preserve-markdown-structure: true
+      include-structural-metadata: true
+
+    # Strategy-specific configurations
+    strategies:
+      # Intelligent strategy configuration
+      intelligent:
+        max-chunk-size: 2500
+        preferred-chunk-size: 1000
+        overlap-size: 150
+        preserve-code-blocks: true
+        maintain-sentence-boundaries: true
+        preserve-markdown-structure: true
+        include-structural-metadata: true
+
+      # Fixed-size strategy configuration
+      fixed-size:
+        max-chunk-size: 1000
+        preferred-chunk-size: 500
+        overlap-size: 50
+        maintain-sentence-boundaries: true
+        preserve-code-blocks: false
+        preserve-markdown-structure: false
+        include-structural-metadata: false
+
+      # Recursive strategy configuration
+      recursive:
+        max-chunk-size: 1500
+        preferred-chunk-size: 750
+        overlap-size: 100
+        maintain-sentence-boundaries: true
+        preserve-code-blocks: true
+        custom-delimiter: "\n\n---\n\n"  # Custom section delimiter
+
+    # Document-type specific configurations
+    # These override strategy configs for specific document types
+    document-types:
+      # Technical documentation settings
+      TECHNICAL_GUIDE:
+        max-chunk-size: 3000
+        preferred-chunk-size: 1500
+        overlap-size: 200
+        preserve-code-blocks: true
+        maintain-sentence-boundaries: true
+        preserve-markdown-structure: true
+        include-structural-metadata: true
+
+      # API documentation settings
+      API_DOCUMENTATION:
+        max-chunk-size: 2500
+        preferred-chunk-size: 1200
+        overlap-size: 150
+        preserve-code-blocks: true
+        maintain-sentence-boundaries: true
+        preserve-markdown-structure: true
+        include-structural-metadata: true
+
+      # Code-heavy documents
+      CODE_HEAVY:
+        max-chunk-size: 4000
+        preferred-chunk-size: 2000
+        overlap-size: 300
+        preserve-code-blocks: true
+        maintain-sentence-boundaries: false  # Code doesn't follow sentence rules
+        preserve-markdown-structure: true
+        include-structural-metadata: true
+
+      # Simple text documents
+      SIMPLE_TEXT:
+        max-chunk-size: 800
+        preferred-chunk-size: 400
+        overlap-size: 50
+        preserve-code-blocks: false
+        maintain-sentence-boundaries: true
+        preserve-markdown-structure: false
+        include-structural-metadata: false
+
+      # Large comprehensive documents
+      COMPREHENSIVE_DOC:
+        max-chunk-size: 2000
+        preferred-chunk-size: 1000
+        overlap-size: 200
+        preserve-code-blocks: true
+        maintain-sentence-boundaries: true
+        preserve-markdown-structure: true
+        include-structural-metadata: true
+
+      # Specification documents
+      SPECIFICATION:
+        max-chunk-size: 1500
+        preferred-chunk-size: 750
+        overlap-size: 100
+        preserve-code-blocks: true
+        maintain-sentence-boundaries: true
+        preserve-markdown-structure: true
+        include-structural-metadata: true
+
+      # Tutorial documents
+      TUTORIAL:
+        max-chunk-size: 2000
+        preferred-chunk-size: 1000
+        overlap-size: 150
+        preserve-code-blocks: true
+        maintain-sentence-boundaries: true
+        preserve-markdown-structure: true
+        include-structural-metadata: true
+
+---
+
+# Alternative configuration profiles for different use cases
+
+# Profile: performance-optimized (faster processing, larger chunks)
+spring:
+  profiles: performance-optimized
+
+rag:
+  chunking:
+    default-strategy: fixed-size
+    global:
+      min-chunk-size: 500
+      max-chunk-size: 4000
+      preferred-chunk-size: 2000
+      overlap-size: 200
+      maintain-sentence-boundaries: false
+      preserve-code-blocks: false
+      preserve-markdown-structure: false
+      include-structural-metadata: false
+
+---
+
+# Profile: quality-optimized (better accuracy, smaller chunks, more processing)
+spring:
+  profiles: quality-optimized
+
+rag:
+  chunking:
+    default-strategy: intelligent
+    global:
+      min-chunk-size: 100
+      max-chunk-size: 1000
+      preferred-chunk-size: 500
+      overlap-size: 100
+      maintain-sentence-boundaries: true
+      preserve-code-blocks: true
+      preserve-markdown-structure: true
+      include-structural-metadata: true
+
+---
+
+# Profile: development (optimized for development and testing)
+spring:
+  profiles: development
+
+rag:
+  chunking:
+    default-strategy: intelligent
+    global:
+      min-chunk-size: 50
+      max-chunk-size: 1000
+      preferred-chunk-size: 300
+      overlap-size: 50
+      maintain-sentence-boundaries: true
+      preserve-code-blocks: true
+      preserve-markdown-structure: true
+      include-structural-metadata: true
+
+---
+
+# Profile: production (balanced for production workloads)
+spring:
+  profiles: production
+
+rag:
+  chunking:
+    default-strategy: intelligent
+    global:
+      min-chunk-size: 200
+      max-chunk-size: 2000
+      preferred-chunk-size: 800
+      overlap-size: 100
+      maintain-sentence-boundaries: true
+      preserve-code-blocks: true
+      preserve-markdown-structure: true
+      include-structural-metadata: true
+
+    # Production-specific optimizations
+    strategies:
+      intelligent:
+        max-chunk-size: 2500
+        preserve-code-blocks: true
+      fixed-size:
+        max-chunk-size: 1500
+        maintain-sentence-boundaries: true
+      recursive:
+        max-chunk-size: 2000
+        preserve-code-blocks: true

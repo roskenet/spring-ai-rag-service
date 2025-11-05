@@ -1,0 +1,117 @@
+
+spring:
+  application:
+    name: spring-ai-rag-service
+  ai:
+    openai:
+      api-key: ${ZTOKEN}
+      base-url: https://zllm.data.zalan.do
+      chat:
+        options:
+          model: openai/gpt-4o
+          max-tokens: 4096
+          temperature: 0.7
+      embedding:
+        options:
+          model: openai/text-embedding-3-small
+          dimensions: 1536
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1536
+        initialize-schema: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/spring_ai_rag_dev
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+
+logging:
+  level:
+    org.springframework.ai: INFO
+    com.zalando.rag: DEBUG
+    root: WARN
+
+# Application specific configuration
+zeos:
+  rag:
+    # Legacy chunking settings (kept for compatibility)
+    chunk-size: 1000
+    chunk-overlap: 200
+    max-results: 5
+    similarity-threshold: 0.3
+    max-file-size: 10MB
+    allowed-file-types: md,markdown,txt
+
+    # Intelligent chunking settings (deprecated - use rag.chunking instead)
+    intelligent-chunking:
+      enabled: true
+      min-chunk-size: 200
+      max-chunk-size: 2000
+      preferred-chunk-size: 800
+      overlap-size: 100
+
+# New extensible chunking configuration
+rag:
+  chunking:
+    # Default strategy to use when none is specified
+    default-strategy: intelligent
+
+    # Global configuration applied to all strategies
+    global:
+      min-chunk-size: 200
+      max-chunk-size: 2000
+      preferred-chunk-size: 800
+      overlap-size: 100
+      preserve-code-blocks: true
+      maintain-sentence-boundaries: true
+      preserve-markdown-structure: true
+      include-structural-metadata: true
+
+    # Strategy-specific configurations
+    strategies:
+      intelligent:
+        max-chunk-size: 2500
+        preferred-chunk-size: 1000
+        preserve-code-blocks: true
+        maintain-sentence-boundaries: true
+        preserve-markdown-structure: true
+
+      fixed-size:
+        max-chunk-size: 1000
+        preferred-chunk-size: 500
+        overlap-size: 50
+        maintain-sentence-boundaries: true
+
+      recursive:
+        max-chunk-size: 1500
+        preferred-chunk-size: 750
+        overlap-size: 100
+
+    # Document-type specific configurations
+    document-types:
+      TECHNICAL_GUIDE:
+        max-chunk-size: 3000
+        preferred-chunk-size: 1500
+        overlap-size: 200
+        preserve-code-blocks: true
+
+      API_DOCUMENTATION:
+        max-chunk-size: 2500
+        preferred-chunk-size: 1200
+        preserve-code-blocks: true
+
+      SIMPLE_TEXT:
+        max-chunk-size: 800
+        preferred-chunk-size: 400
+        overlap-size: 50
+        preserve-code-blocks: false
+        preserve-markdown-structure: false
+server:
+  port: 9090

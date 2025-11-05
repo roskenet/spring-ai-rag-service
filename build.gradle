@@ -1,0 +1,99 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '7.0.2'
+}
+
+group = 'com.zalando'
+version = '0.0.1-SNAPSHOT'
+description = 'Spring AI RAG Learning Platform'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('springAiVersion', "1.0.3")
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
+    implementation 'org.springframework.ai:spring-ai-markdown-document-reader'
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
+    runtimeOnly 'org.postgresql:postgresql'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Add a custom task to check code style
+tasks.register('checkStyle') {
+    dependsOn 'spotlessCheck'
+    group = 'verification'
+    description = 'Checks code style and formatting'
+}
+
+// Add a custom task to format code
+tasks.register('formatCode') {
+    dependsOn 'spotlessApply'
+    group = 'formatting'
+    description = 'Formats all source code according to style guidelines'
+}
+
+// Make build depend on spotless check
+tasks.named('build') {
+    dependsOn 'spotlessCheck'
+}
+
+spotless {
+    java {
+        target 'src/**/*.java'
+        googleJavaFormat('1.19.2')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+
+        // Custom formatting rules
+        toggleOffOn()
+
+        // Exclude generated files
+        targetExclude 'src/main/generated/**'
+    }
+
+    // Format other file types as well
+    format 'misc', {
+        target '*.gradle', '*.md', '.gitignore'
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
