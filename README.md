@@ -2,7 +2,7 @@
 
 > **A comprehensive learning and experimentation platform for Retrieval-Augmented Generation (RAG) architecture using Spring AI, designed to build deep technical knowledge and hands-on experience with modern AI integration patterns.**
 
-## 🎯 Mission Statement
+## Mission Statement
 
 This project serves as a sophisticated learning platform for RAG architecture within the Spring ecosystem, specifically designed for engineers to gain hands-on experience with modern AI integration patterns. Built to accelerate knowledge building in the AI domain, this platform demonstrates advanced chunking strategies, vectorization techniques, and extensible patterns that provide a solid foundation for future production implementations.
 
@@ -15,7 +15,7 @@ As engineers building expertise in AI systems, we recognize that RAG implementat
 - **Extensible Strategy Pattern**: Future-proofing the system for integration with AWS Bedrock Knowledge Bases and other vector stores
 - **Performance Engineering**: Built-in benchmarking and metrics for informed technical decisions
 
-## 🚀 Key Innovations
+## Key Features
 
 ### Advanced Chunking Architecture
 
@@ -105,7 +105,7 @@ BenchmarkResult result = chunkingBenchmark.benchmarkDocument(content, filename, 
 // Automatic selection of optimal strategy based on performance characteristics
 ```
 
-## 🏛️ Technology Stack
+## Technology Stack
 
 ### Core Framework
 - **Spring Boot 3.5.7**: Latest enterprise framework with native compilation support
@@ -123,7 +123,7 @@ BenchmarkResult result = chunkingBenchmark.benchmarkDocument(content, filename, 
 - **Spring Data JPA**: Object-relational mapping with query optimization
 - **HNSW Indexing**: Hierarchical Navigable Small World for sub-linear search complexity
 
-## 🎓 Learning Objectives
+## Learning Objectives
 
 This platform serves as a comprehensive educational tool for understanding:
 
@@ -147,7 +147,7 @@ This platform serves as a comprehensive educational tool for understanding:
 - **Vector Store Abstraction**: Database-agnostic vector operations
 - **Chat Model Integration**: Seamless LLM communication with prompt template management
 
-## 🚦 Quick Start Guide
+## Quick Start Guide
 
 Get up and running in minutes with our comprehensive setup guide.
 
@@ -169,7 +169,7 @@ export ZTOKEN="your-zalando-zllm-token"
 curl -X POST http://localhost:9090/api/documents/upload -F "file=@sample-adr.md"
 ```
 
-## 📊 Architecture Deep Dive
+## Architecture Deep Dive
 
 Explore the sophisticated architecture behind this RAG learning platform.
 
@@ -184,7 +184,7 @@ Explore the sophisticated architecture behind this RAG learning platform.
 
 **→ [Database Schema & Exploration Guide](docs/DEVELOPMENT.md#database-exploration)**
 
-## 🔧 Configuration & Customization
+## Configuration & Customization
 
 The platform provides extensive configuration options for different document types and use cases.
 
@@ -197,7 +197,7 @@ The platform provides extensive configuration options for different document typ
 - **Performance Tuning**: Adjustable chunk sizes, overlap, and processing options
 - **Extension Points**: Easy customization for specific use cases
 
-## 📈 Performance & Benchmarking
+## Performance & Benchmarking
 
 Understand and measure the performance characteristics of different chunking strategies.
 
@@ -213,7 +213,7 @@ The platform includes comprehensive benchmarking tools to:
 
 **→ [Benchmarking API Documentation](docs/DEVELOPMENT.md#performance-monitoring)**
 
-## 🛣️ Roadmap & Extensibility
+## Roadmap & Extensibility
 
 ### Phase 1: AWS Bedrock Integration
 - **Knowledge Base Connector**: Direct integration with AWS Bedrock KB
@@ -230,7 +230,7 @@ The platform includes comprehensive benchmarking tools to:
 - **Access Control**: Fine-grained permissions and document security
 - **Audit Logging**: Comprehensive tracking for compliance requirements
 
-## 🧹 Code Quality & Standards
+## Code Quality & Standards
 
 **For Contributors**: Maintain high code quality with automated formatting and comprehensive guidelines.
 
@@ -245,7 +245,7 @@ The platform includes comprehensive benchmarking tools to:
 
 **→ [Detailed Formatting Rules & Standards](docs/CODE_QUALITY.md#formatting-standards)**
 
-## 📖 Documentation
+## Documentation
 
 Comprehensive documentation for all aspects of the platform:
 
@@ -263,7 +263,7 @@ Comprehensive documentation for all aspects of the platform:
 - **Extensions**: [Adding Strategies](docs/DEVELOPMENT.md#adding-new-chunking-strategies)
 - **Database**: [pgAdmin & Queries](docs/DEVELOPMENT.md#database-exploration)
 
-## 🤝 Contributing & Learning
+## Contributing & Learning
 
 This platform is designed for collaborative learning and extension.
 
@@ -277,7 +277,7 @@ This platform is designed for collaborative learning and extension.
 - **Vector Databases**: Work with pgvector and similarity search
 - **Performance Analysis**: Use built-in benchmarking for optimization
 
-## 📚 Additional Resources
+## Additional Resources
 
 ### Spring AI Documentation
 - [Spring AI Reference Guide](https://docs.spring.io/spring-ai/reference/)
@@ -293,7 +293,7 @@ This platform is designed for collaborative learning and extension.
 - [pgvector Performance Guide](https://github.com/pgvector/pgvector#performance)
 - [Spring AI Configuration Tuning](https://docs.spring.io/spring-ai/reference/configuration/)
 
-## 📄 API Reference
+## API Reference
 
 **→ [Complete API Documentation](docs/API.md)**
 
