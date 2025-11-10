@@ -1,0 +1,58 @@
+version: '3.8'
+
+networks:
+  spring-ai-rag-network:
+    driver: bridge
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: spring-ai-rag-postgres
+    hostname: postgres
+    environment:
+      POSTGRES_DB: spring_ai_rag_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    command: postgres -c shared_preload_libraries=vector
+    networks:
+      - spring-ai-rag-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: spring-ai-rag-pgadmin
+    hostname: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - spring-ai-rag-network
+    entrypoint: >
+      /bin/sh -c "
+      echo 'postgres:5432:*:postgres:postgres' > /tmp/pgpassfile;
+      chmod 600 /tmp/pgpassfile;
+      /entrypoint.sh
+      "
+
+volumes:
+  postgres_data:
+  pgadmin_data:

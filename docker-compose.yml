@@ -1,13 +1,14 @@
 version: '3.8'
 
 networks:
-  spring-ai-rag-network:
+  zeos-rag-network:
     driver: bridge
 
 services:
+  # PostgreSQL database with pgvector extension
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: spring-ai-rag-postgres
+    container_name: zeos-rag-postgres
     hostname: postgres
     environment:
       POSTGRES_DB: spring_ai_rag_dev
@@ -17,19 +18,20 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     command: postgres -c shared_preload_libraries=vector
     networks:
-      - spring-ai-rag-network
+      - zeos-rag-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 30s
       timeout: 10s
       retries: 3
 
+  # PgAdmin for database management (optional)
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: spring-ai-rag-pgadmin
+    container_name: zeos-rag-pgadmin
     hostname: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
@@ -40,18 +42,73 @@ services:
       - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      - ./pgadmin-servers.json:/pgadmin4/servers.json
+      - ./backend/pgadmin-servers.json:/pgadmin4/servers.json
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - spring-ai-rag-network
+      - zeos-rag-network
     entrypoint: >
       /bin/sh -c "
       echo 'postgres:5432:*:postgres:postgres' > /tmp/pgpassfile;
       chmod 600 /tmp/pgpassfile;
       /entrypoint.sh
       "
+    profiles:
+      - admin
+
+  # Backend Spring Boot application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zeos-rag-backend
+    hostname: backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/spring_ai_rag_dev
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - ZTOKEN=${ZTOKEN}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - zeos-rag-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    restart: unless-stopped
+
+  # Frontend Next.js application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: zeos-rag-frontend
+    hostname: frontend
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - zeos-rag-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    restart: unless-stopped
 
 volumes:
   postgres_data:
