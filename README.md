@@ -1,6 +1,6 @@
-# Spring AI RAG Service: Advanced Learning Platform
+# ZEOS RAG Platform: Advanced Learning Platform
 
-> **A comprehensive learning and experimentation platform for Retrieval-Augmented Generation (RAG) architecture using Spring AI, designed to build deep technical knowledge and hands-on experience with modern AI integration patterns.**
+> **A comprehensive monorepo platform for Retrieval-Augmented Generation (RAG) architecture featuring both Spring Boot backend and Next.js frontend, designed to build deep technical knowledge and hands-on experience with modern AI integration patterns.**
 
 ## 🎯 Mission Statement
 
@@ -147,27 +147,188 @@ This platform serves as a comprehensive educational tool for understanding:
 - **Vector Store Abstraction**: Database-agnostic vector operations
 - **Chat Model Integration**: Seamless LLM communication with prompt template management
 
+## 🏗️ Monorepo Structure
+
+```
+zeos-rag/                          # Monorepo root (this directory)
+├── backend/                       # Spring Boot Backend
+│   ├── src/                      # Java source code
+│   ├── build.gradle              # Gradle build configuration
+│   ├── docker-compose.yml        # PostgreSQL + pgAdmin setup
+│   └── README.md                 # Backend documentation
+├── frontend/                      # Next.js Frontend
+│   ├── src/                      # React/TypeScript source
+│   ├── package.json              # Node.js dependencies
+│   └── README.md                 # Frontend documentation
+├── docs/                         # Shared documentation
+└── README.md                     # This file
+```
+
 ## 🚦 Quick Start Guide
 
-Get up and running in minutes with our comprehensive setup guide.
+Get up and running in minutes with Docker automation for the complete application stack.
 
-**→ [Complete Development Setup Guide](docs/DEVELOPMENT.md#getting-started)**
+### Prerequisites
+- **Docker** and **Docker Compose** installed
+- **`ztoken` CLI tool** installed (recommended), OR
+- **ZTOKEN** environment variable with your JWT token
 
-### TL;DR Quick Start
+### One-Command Setup
 
 ```bash
-# 1. Start dependencies
-docker-compose up -d
-
-# 2. Set your ZLLM token
-export ZTOKEN="your-zalando-zllm-token"
-
-# 3. Run the application
-./gradlew bootRun
-
-# 4. Test the API
-curl -X POST http://localhost:9090/api/documents/upload -F "file=@sample-adr.md"
+# Simply run the application stack - token will be fetched automatically
+./run-local.sh start
 ```
+
+The script automatically:
+- ✅ **Fetches JWT token** using the `ztoken` CLI tool (if available)
+- ✅ **Falls back** to existing `ZTOKEN` environment variable
+- ✅ **Provides clear guidance** if neither option is available
+
+That's it! The script will:
+- ✅ Build backend and frontend Docker images
+- ✅ Start PostgreSQL with pgvector extension
+- ✅ Deploy backend Spring Boot application
+- ✅ Deploy frontend Next.js application
+- ✅ Wait for all services to be healthy
+- ✅ Display access URLs
+
+### Access Your Application
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Frontend** | http://localhost:3000 | Main application interface |
+| **Backend API** | http://localhost:8080 | REST API and health endpoints |
+| **PgAdmin** | http://localhost:5050 | Database admin (admin@example.com / admin) |
+
+### Script Commands
+
+```bash
+# Start all services
+./run-local.sh start
+
+# Start with database admin interface
+./run-local.sh admin
+
+# View service status
+./run-local.sh status
+
+# View logs (all services)
+./run-local.sh logs
+
+# View logs for specific service
+./run-local.sh logs backend
+./run-local.sh logs frontend
+
+# Stop all services
+./run-local.sh stop
+
+# Restart all services
+./run-local.sh restart
+
+# Clean up (stop and remove volumes)
+./run-local.sh clean
+
+# Show help
+./run-local.sh help
+```
+
+### Test the System
+
+```bash
+# Test the API
+curl -X POST http://localhost:8080/api/documents/upload -F "file=@sample-adr.md"
+
+# Or use the frontend interface at http://localhost:3000
+```
+
+### Manual Development Setup (Alternative)
+
+If you prefer to run services individually for development:
+
+#### 1. Start Database Only
+
+```bash
+cd backend
+docker-compose up -d
+```
+
+#### 2. Start Backend (Development Mode)
+
+```bash
+cd backend
+# Token will be fetched automatically if ztoken CLI is available
+export ZTOKEN=$(ztoken 2>/dev/null || echo "your-jwt-token-here")
+./gradlew bootRun
+```
+
+#### 3. Start Frontend (Development Mode)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Troubleshooting
+
+#### Common Issues
+
+**Token issues:**
+```bash
+# If ztoken CLI is not available and ZTOKEN not set
+export ZTOKEN="your-jwt-token-here"
+./run-local.sh start
+
+# Or install the ztoken CLI tool and run:
+./run-local.sh start
+```
+
+**Port conflicts:**
+```bash
+# If ports 3000, 8080, or 5432 are in use
+./run-local.sh stop
+# Or modify ports in docker-compose.yml
+```
+
+**Docker build issues:**
+```bash
+# Clean up and rebuild
+./run-local.sh clean
+docker system prune -f
+./run-local.sh start
+```
+
+**Service health check failures:**
+```bash
+# Check service logs
+./run-local.sh logs backend
+./run-local.sh logs frontend
+
+# Restart specific service
+docker-compose restart backend
+```
+
+#### System Requirements
+
+- **Memory**: Minimum 4GB RAM (8GB recommended)
+- **Disk**: At least 5GB free space for Docker images
+- **Network**: Internet access for downloading dependencies
+
+#### Environment Variables
+
+| Variable | Required | Description | Example |
+|----------|----------|-------------|---------|
+| `ZTOKEN` | No* | JWT token for backend authentication | `eyJ0eXAiOiJKV1QiLCJhbGc...` |
+| `NEXT_PUBLIC_API_URL` | No | Frontend API URL (auto-configured) | `http://localhost:8080` |
+
+_*Required only if `ztoken` CLI tool is not available_
+
+#### Token Fetching Options
+
+1. **Automatic (Recommended)**: Install `ztoken` CLI tool - tokens fetched automatically
+2. **Manual**: Set `ZTOKEN` environment variable manually
+3. **Override**: Use `ZTOKEN='token' ./run-local.sh start` to override automatic fetching
 
 ## 📊 Architecture Deep Dive
 
@@ -229,6 +390,29 @@ The platform includes comprehensive benchmarking tools to:
 - **Multi-Tenancy**: Isolated document collections per tenant (for production extension)
 - **Access Control**: Fine-grained permissions and document security
 - **Audit Logging**: Comprehensive tracking for compliance requirements
+
+## 🎨 Frontend Features
+
+The Next.js frontend provides a modern, interactive interface for the RAG platform:
+
+### Core Functionality
+- **Interactive Chat**: Real-time chat interface with RAG responses
+- **Document Management**: Upload, view, and manage knowledge base documents
+- **Configuration Panel**: Dynamic RAG parameter tuning (similarity threshold, max results, etc.)
+
+### Analytics Dashboard
+- **Query Performance**: Response time and accuracy metrics visualization
+- **System Health**: Real-time system performance monitoring with charts
+- **Document Analytics**: Usage patterns and processing metrics
+- **Interactive Charts**: Time-series data visualization using Recharts
+
+### Technology Stack
+- **Next.js 14**: App Router with server-side rendering
+- **TypeScript**: Full type safety across the application
+- **Tailwind CSS**: Modern, responsive styling
+- **Radix UI**: Accessible, unstyled UI components
+- **Recharts**: Interactive data visualization
+- **React Context**: State management with localStorage persistence
 
 ## 🧹 Code Quality & Standards
 

@@ -1,0 +1,44 @@
+# Build artifacts
+/build/
+/target/
+*.jar
+*.war
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Logs
+*.log
+logs/
+
+# Gradle cache (but keep wrapper)
+.gradle/
+
+# Keep gradlew and gradle wrapper for build
+!gradlew
+!gradlew.bat
+!gradle/
+
+# Application specific
+application-local.yaml
+application-dev.yaml
