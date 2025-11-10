@@ -1,10 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { PageHeader } from "@/components/page-header"
-import { PageContainer } from "@/components/page-container"
+import { Button, Card, CardContent, Typography, Box, Container, Chip } from "@mui/material"
 import { apiClient } from "@/lib/api"
 import type { AnalyticsDashboard } from "@/lib/api"
 import {
@@ -582,177 +579,229 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <PageContainer>
-        <PageHeader
-          title="Analytics"
-          description="Monitor your RAG system performance and document usage"
-        >
-          <div className="flex gap-2">
+    <Container maxWidth="xl">
+      {/* Page Header */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              Analytics
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Monitor your RAG system performance and document usage
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             {["24hours", "7days", "30days"].map((range) => (
               <Button
                 key={range}
-                variant={timeRange === range ? "default" : "outline"}
-                size="sm"
+                variant={timeRange === range ? "contained" : "outlined"}
+                size="small"
                 onClick={() => setTimeRange(range)}
-                className={timeRange === range ? "bg-gradient-to-r from-primary to-secondary" : "bg-transparent"}
+                sx={{
+                  ...(timeRange === range && {
+                    background: 'linear-gradient(45deg, #2563eb, #7c3aed)',
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #1d4ed8, #6d28d9)',
+                    },
+                  }),
+                }}
               >
                 {range === "24hours" ? "24h" : range === "7days" ? "7d" : "30d"}
               </Button>
             ))}
-          </div>
-        </PageHeader>
+          </Box>
+        </Box>
+      </Box>
 
-        {/* Key Metrics */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {getStats().map((stat, idx) => (
-            <Card key={idx} className="border border-border bg-card/50 backdrop-blur p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                  <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-                </div>
-                <span className="text-3xl">{stat.icon}</span>
-              </div>
-              <p className="text-xs text-secondary font-semibold">{stat.change} this month</p>
-            </Card>
-          ))}
-        </div>
+      {/* Key Metrics */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2, mb: 4 }}>
+        {getStats().map((stat, idx) => (
+          <Card key={idx} sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                    {stat.label}
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    {stat.value}
+                  </Typography>
+                </Box>
+                <Typography sx={{ fontSize: '1.5rem' }}>{stat.icon}</Typography>
+              </Box>
+              <Typography variant="caption" color="secondary.main" sx={{ fontWeight: 600 }}>
+                {stat.change}
+              </Typography>
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
 
-        {/* Charts Grid */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Document Growth */}
-          <Card className="border border-border bg-card/50 backdrop-blur p-6">
-            <h2 className="text-lg font-semibold mb-4 text-foreground">Document Growth</h2>
+      {/* Charts Grid */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, 1fr)' }, gap: 3, mb: 4 }}>
+        {/* Document Growth */}
+        <Card sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Document Growth
+            </Typography>
             <ResponsiveContainer width="100%" height={300}>
               {documentGrowthData.length > 0 ? (
                 <AreaChart data={documentGrowthData}>
                 <defs>
                   <linearGradient id="colorDocuments" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="colorChunks" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-secondary)" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="var(--color-secondary)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="month" stroke="var(--color-muted-foreground)" />
-                <YAxis stroke="var(--color-muted-foreground)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.3)" />
+                <XAxis dataKey="month" stroke="rgba(148, 163, 184, 0.8)" />
+                <YAxis stroke="rgba(148, 163, 184, 0.8)" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "var(--color-background)",
-                    border: "1px solid var(--color-border)",
+                    backgroundColor: "var(--mui-palette-background-paper)",
+                    border: "1px solid var(--mui-palette-divider)",
+                    borderRadius: "8px",
+                    color: "var(--mui-palette-text-primary)"
                   }}
                 />
                 <Legend />
                 <Area
                   type="monotone"
                   dataKey="documents"
-                  stroke="var(--color-primary)"
+                  stroke="#2563eb"
                   fillOpacity={1}
                   fill="url(#colorDocuments)"
                 />
                 <Area
                   type="monotone"
                   dataKey="chunks"
-                  stroke="var(--color-secondary)"
+                  stroke="#7c3aed"
                   fillOpacity={1}
                   fill="url(#colorChunks)"
                 />
               </AreaChart>
               ) : (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center text-muted-foreground">
-                    <p className="text-sm">No document growth data available</p>
-                    <p className="text-xs mt-1">Upload some documents to see growth trends</p>
-                  </div>
-                </div>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      No document growth data available
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                      Upload some documents to see growth trends
+                    </Typography>
+                  </Box>
+                </Box>
               )}
             </ResponsiveContainer>
-          </Card>
+          </CardContent>
+        </Card>
 
-          {/* Document Type Distribution */}
-          <Card className="border border-border bg-card/50 backdrop-blur p-6">
-            <h2 className="text-lg font-semibold mb-4 text-foreground">Document Types</h2>
-            <div className="space-y-4">
+        {/* Document Type Distribution */}
+        <Card sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Document Types
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {documentTypeData.length > 0 ? (
                 documentTypeData.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{
+                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
+                      <Box
+                        sx={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: '50%',
                           backgroundColor: `hsl(${(index * 60) % 360}, 70%, 50%)`
                         }}
                       />
-                      <span className="text-sm font-medium text-foreground truncate">
+                      <Typography variant="body2" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {item.type}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
                         {item.count} docs
-                      </span>
-                      <span className="text-sm font-semibold text-primary min-w-[3rem] text-right">
+                      </Typography>
+                      <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, minWidth: '3rem', textAlign: 'right' }}>
                         {item.value}%
-                      </span>
-                    </div>
-                  </div>
+                      </Typography>
+                    </Box>
+                  </Box>
                 ))
               ) : (
-                <div className="text-center text-muted-foreground py-8">
-                  No document types available
-                </div>
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No document types available
+                  </Typography>
+                </Box>
               )}
-            </div>
-          </Card>
-        </div>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
 
-        {/* Performance Metrics */}
-        <Card className="border border-border bg-card/50 backdrop-blur p-6">
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="text-lg font-semibold text-foreground">RAG Performance Metrics</h2>
-            <div className="flex gap-2">
+      {/* Performance Metrics */}
+      <Card sx={{ bgcolor: 'background.paper', borderRadius: 2, mb: 4 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              RAG Performance Metrics
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
               {["6hours", "24hours", "1week"].map((range) => (
                 <Button
                   key={range}
-                  variant={performanceTimeRange === range ? "default" : "outline"}
-                  size="sm"
+                  variant={performanceTimeRange === range ? "contained" : "outlined"}
+                  size="small"
                   onClick={() => setPerformanceTimeRange(range)}
-                  className={performanceTimeRange === range ? "bg-gradient-to-r from-primary to-secondary" : "bg-transparent"}
+                  sx={{
+                    ...(performanceTimeRange === range && {
+                      background: 'linear-gradient(45deg, #2563eb, #7c3aed)',
+                      '&:hover': {
+                        background: 'linear-gradient(45deg, #1d4ed8, #6d28d9)',
+                      },
+                    }),
+                  }}
                 >
                   {range === "6hours" ? "6h" : range === "24hours" ? "24h" : "1w"}
                 </Button>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
           <ResponsiveContainer width="100%" height={350}>
             {performanceData && performanceData.length > 0 ? (
               <LineChart data={performanceData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.3)" />
               <XAxis
                 dataKey="time"
-                stroke="var(--color-muted-foreground)"
+                stroke="rgba(148, 163, 184, 0.8)"
                 tick={{ fontSize: 12 }}
               />
               <YAxis
                 yAxisId="left"
-                stroke="var(--color-muted-foreground)"
+                stroke="rgba(148, 163, 184, 0.8)"
                 label={{ value: 'Response Time (ms)', angle: -90, position: 'insideLeft' }}
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
-                stroke="var(--color-secondary)"
+                stroke="#7c3aed"
                 label={{ value: 'Query Count', angle: 90, position: 'insideRight' }}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "var(--color-background)",
-                  border: "1px solid var(--color-border)",
+                  backgroundColor: "var(--mui-palette-background-paper)",
+                  border: "1px solid var(--mui-palette-divider)",
                   borderRadius: "8px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  color: "var(--mui-palette-text-primary)"
                 }}
                 formatter={(value: any, name: string) => {
                   if (value === null || value === undefined) {
@@ -776,103 +825,128 @@ export default function AnalyticsPage() {
                 yAxisId="left"
                 type="monotone"
                 dataKey="avgResponse"
-                stroke="var(--color-primary)"
+                stroke="#2563eb"
                 strokeWidth={2}
                 strokeOpacity={0.8}
                 name="Avg Response (ms)"
                 dot={(props: any) => {
                   if (props.payload.avgResponse === null) return null;
-                  return <circle key={`response-${props.index}`} cx={props.cx} cy={props.cy} r={4} fill="var(--color-primary)" strokeWidth={2} stroke="var(--color-background)" />;
+                  return <circle key={`response-${props.index}`} cx={props.cx} cy={props.cy} r={4} fill="#2563eb" strokeWidth={2} stroke="#ffffff" />;
                 }}
-                activeDot={{ r: 6, stroke: "var(--color-primary)", strokeWidth: 2 }}
+                activeDot={{ r: 6, stroke: "#2563eb", strokeWidth: 2 }}
                 connectNulls={false}
               />
               <Line
                 yAxisId="right"
                 type="monotone"
                 dataKey="queries"
-                stroke="var(--color-secondary)"
+                stroke="#7c3aed"
                 strokeWidth={2}
                 strokeOpacity={0.7}
                 name="Query Count"
                 strokeDasharray="5 5"
                 dot={(props: any) => {
                   if (props.payload.queries === null) return null;
-                  return <circle key={`queries-${props.index}`} cx={props.cx} cy={props.cy} r={3} fill="var(--color-secondary)" strokeWidth={2} stroke="var(--color-background)" />;
+                  return <circle key={`queries-${props.index}`} cx={props.cx} cy={props.cy} r={3} fill="#7c3aed" strokeWidth={2} stroke="#ffffff" />;
                 }}
-                activeDot={{ r: 5, stroke: "var(--color-secondary)", strokeWidth: 2 }}
+                activeDot={{ r: 5, stroke: "#7c3aed", strokeWidth: 2 }}
                 connectNulls={false}
               />
             </LineChart>
             ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center text-muted-foreground">
-                  <p className="text-sm">No performance data available</p>
-                  <p className="text-xs mt-1">Send some queries to see performance metrics</p>
-                </div>
-              </div>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No performance data available
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                    Send some queries to see performance metrics
+                  </Typography>
+                </Box>
+              </Box>
             )}
           </ResponsiveContainer>
           {performanceData && performanceData.length > 0 && (
-            <div className="mt-2 text-xs text-muted-foreground">
-              {(() => {
-                const activeDataPoints = performanceData.filter(d => d.avgResponse !== null).length;
-                return (
-                  <>
-                    <p>📍 Showing {performanceTimeRange === "24hours" ? "24-hour timeline" : performanceTimeRange === "6hours" ? "6-hour timeline" : "7-day timeline"} • {activeDataPoints} active data points</p>
-                    {activeDataPoints < 5 && (
-                      <p>💡 Chart shows gaps where no queries occurred</p>
-                    )}
-                  </>
-                );
-              })()}
-            </div>
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                {(() => {
+                  const activeDataPoints = performanceData.filter(d => d.avgResponse !== null).length;
+                  return (
+                    <>
+                      📍 Showing {performanceTimeRange === "24hours" ? "24-hour timeline" : performanceTimeRange === "6hours" ? "6-hour timeline" : "7-day timeline"} • {activeDataPoints} active data points
+                      {activeDataPoints < 5 && (
+                        <><br />💡 Chart shows gaps where no queries occurred</>
+                      )}
+                    </>
+                  );
+                })()}
+              </Typography>
+            </Box>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Summary Stats */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+        <Card sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Query Insights
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  Avg Queries per Day
+                </Typography>
+                <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
+                  {dashboardData ? Math.round(dashboardData.last7Days.queries / 7) : "..."}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  24h Queries
+                </Typography>
+                <Typography variant="body2" color="secondary.main" sx={{ fontWeight: 600 }}>
+                  {dashboardData ? dashboardData.last24Hours.queries : "..."}
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
         </Card>
 
-        {/* Summary Stats */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="border border-border bg-card/50 backdrop-blur p-6">
-            <h3 className="font-semibold text-foreground mb-4">Query Insights</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Avg Queries per Day</span>
-                <span className="font-semibold text-primary">
-                  {dashboardData ? Math.round(dashboardData.last7Days.queries / 7) : "..."}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">24h Queries</span>
-                <span className="font-semibold text-secondary">
-                  {dashboardData ? dashboardData.last24Hours.queries : "..."}
-                </span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="border border-border bg-card/50 backdrop-blur p-6">
-            <h3 className="font-semibold text-foreground mb-4">System Health</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Response Time (7d)</span>
-                <span className={`font-semibold ${
-                  dashboardData && dashboardData.last7Days.avgResponseTime && dashboardData.last7Days.avgResponseTime < 2000
-                    ? 'text-green-500'
-                    : dashboardData && dashboardData.last7Days.avgResponseTime && dashboardData.last7Days.avgResponseTime < 5000
-                      ? 'text-yellow-500'
-                      : 'text-red-500'
-                }`}>
+        <Card sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              System Health
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  Response Time (7d)
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    color: dashboardData && dashboardData.last7Days.avgResponseTime && dashboardData.last7Days.avgResponseTime < 2000
+                      ? 'success.main'
+                      : dashboardData && dashboardData.last7Days.avgResponseTime && dashboardData.last7Days.avgResponseTime < 5000
+                        ? 'warning.main'
+                        : 'error.main'
+                  }}
+                >
                   {dashboardData && dashboardData.last7Days.avgResponseTime
                     ? `${dashboardData.last7Days.avgResponseTime > 1000
                         ? (dashboardData.last7Days.avgResponseTime / 1000).toFixed(1) + 's'
                         : Math.round(dashboardData.last7Days.avgResponseTime) + 'ms'}`
                     : "N/A"
                   }
-                </span>
-              </div>
-            </div>
-          </Card>
-        </div>
-    </PageContainer>
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+    </Container>
   )
 }

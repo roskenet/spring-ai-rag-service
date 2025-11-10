@@ -1,20 +1,20 @@
 "use client"
 
 import { useTheme } from "@/app/client-layout"
-import { Button } from "@/components/ui/button"
+import { IconButton } from "@mui/material"
+import { Brightness4, Brightness7 } from "@mui/icons-material"
 
 export function ThemeToggle() {
   const { isDark, toggleTheme } = useTheme()
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
+    <IconButton
       onClick={toggleTheme}
-      className="border-border hover:bg-background hover:text-foreground bg-transparent"
+      color="inherit"
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      size="small"
     >
-      {isDark ? "☀️" : "🌙"}
-    </Button>
+      {isDark ? <Brightness7 /> : <Brightness4 />}
+    </IconButton>
   )
 }

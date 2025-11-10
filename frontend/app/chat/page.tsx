@@ -3,8 +3,7 @@
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Button, Card, CardContent, Box, Paper, Typography, TextField } from "@mui/material"
 import { apiClient, generateSessionId } from "@/lib/api"
 
 interface Message {
@@ -110,98 +109,229 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px-64px)]">
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto mb-4 space-y-4 pr-2">
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 128px)' }}>
+      {/* Messages Area */}
+      <Box sx={{ flex: 1, overflowY: 'auto', mb: 2, px: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {messages.map((message) => (
-            <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`max-w-xl lg:max-w-2xl rounded-lg px-4 py-3 ${
-                  message.role === "user"
-                    ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-br-none"
-                    : "bg-card border border-border text-foreground rounded-bl-none"
-                }`}
+            <Box
+              key={message.id}
+              sx={{
+                display: 'flex',
+                justifyContent: message.role === "user" ? "flex-end" : "flex-start"
+              }}
+            >
+              <Paper
+                sx={{
+                  maxWidth: { xs: '85%', lg: '70%' },
+                  px: 2,
+                  py: 1.5,
+                  borderRadius: 2,
+                  ...(message.role === "user" ? {
+                    background: 'linear-gradient(45deg, #2563eb, #7c3aed)',
+                    color: 'white',
+                    borderBottomRightRadius: 4,
+                  } : {
+                    bgcolor: 'background.paper',
+                    border: 1,
+                    borderColor: 'divider',
+                    borderBottomLeftRadius: 4,
+                  })
+                }}
               >
-                <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                <span className="text-xs opacity-60 mt-2 block">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-words',
+                    lineHeight: 1.5
+                  }}
+                >
+                  {message.content}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    opacity: 0.7,
+                    mt: 1,
+                    display: 'block',
+                    color: message.role === "user" ? 'rgba(255,255,255,0.8)' : 'text.secondary'
+                  }}
+                >
                   {message.timestamp.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
-                </span>
-              </div>
-            </div>
+                </Typography>
+              </Paper>
+            </Box>
           ))}
 
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-card border border-border rounded-lg px-4 py-3 rounded-bl-none">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+              <Paper sx={{ borderRadius: 2, borderBottomLeftRadius: 4, px: 2, py: 1.5, border: 1, borderColor: 'divider' }}>
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      bgcolor: 'primary.main',
+                      borderRadius: '50%',
+                      animation: 'bounce 1.4s ease-in-out infinite both',
+                      '@keyframes bounce': {
+                        '0%, 80%, 100%': { transform: 'scale(0)' },
+                        '40%': { transform: 'scale(1)' }
+                      }
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      bgcolor: 'primary.main',
+                      borderRadius: '50%',
+                      animation: 'bounce 1.4s ease-in-out infinite both',
+                      animationDelay: '0.1s',
+                      '@keyframes bounce': {
+                        '0%, 80%, 100%': { transform: 'scale(0)' },
+                        '40%': { transform: 'scale(1)' }
+                      }
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      bgcolor: 'primary.main',
+                      borderRadius: '50%',
+                      animation: 'bounce 1.4s ease-in-out infinite both',
+                      animationDelay: '0.2s',
+                      '@keyframes bounce': {
+                        '0%, 80%, 100%': { transform: 'scale(0)' },
+                        '40%': { transform: 'scale(1)' }
+                      }
+                    }}
+                  />
+                </Box>
+              </Paper>
+            </Box>
           )}
 
           <div ref={messagesEndRef} />
-        </div>
+        </Box>
+      </Box>
 
-        {/* Input Area */}
-        <Card className="border border-border bg-card/50 backdrop-blur p-4">
-          <div className="flex gap-2 items-end">
-            <textarea
+      {/* Input Area */}
+      <Card sx={{ bgcolor: 'background.paper', backdropFilter: 'blur(8px)' }}>
+        <CardContent sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
+            <TextField
+              multiline
+              rows={3}
+              fullWidth
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask a question about your documents... (Shift+Enter for new line)"
-              className="flex-1 bg-background border border-border rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder:text-muted-foreground"
-              rows={3}
               disabled={isLoading}
+              variant="outlined"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                }
+              }}
             />
             <Button
               onClick={handleSendMessage}
               disabled={isLoading || !input.trim()}
-              className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/40 transition-all"
+              variant="contained"
+              sx={{
+                background: 'linear-gradient(45deg, #2563eb, #7c3aed)',
+                minWidth: 80,
+                height: 'fit-content',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #1d4ed8, #6d28d9)',
+                  boxShadow: '0 8px 25px rgba(37, 99, 235, 0.3)',
+                },
+              }}
             >
               Send
             </Button>
-          </div>
-        </Card>
+          </Box>
+        </CardContent>
+      </Card>
 
-        {/* Empty State Suggestions */}
-        {messages.length === 1 && (
-          <div className="mt-6 grid md:grid-cols-3 gap-4 text-center">
-            <Card
-              className="p-4 border border-border/50 bg-card/30 hover:border-primary/50 cursor-pointer transition-colors"
-              onClick={() => setInput("What are the main topics covered in my documents?")}
-            >
-              <p className="text-sm font-semibold text-primary mb-1">📚 Explore</p>
-              <p className="text-xs text-muted-foreground">Main topics in documents</p>
-            </Card>
-            <Card
-              className="p-4 border border-border/50 bg-card/30 hover:border-primary/50 cursor-pointer transition-colors"
-              onClick={() => setInput("Summarize the key information")}
-            >
-              <p className="text-sm font-semibold text-primary mb-1">✨ Summarize</p>
-              <p className="text-xs text-muted-foreground">Key information summary</p>
-            </Card>
-            <Card
-              className="p-4 border border-border/50 bg-card/30 hover:border-primary/50 cursor-pointer transition-colors"
-              onClick={() => setInput("What insights can you provide?")}
-            >
-              <p className="text-sm font-semibold text-primary mb-1">💡 Insights</p>
-              <p className="text-xs text-muted-foreground">Generate insights</p>
-            </Card>
-          </div>
-        )}
-    </div>
+      {/* Empty State Suggestions */}
+      {messages.length === 1 && (
+        <Box sx={{ mt: 3, display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
+          <Card
+            sx={{
+              p: 2,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              bgcolor: 'background.paper',
+              border: 1,
+              borderColor: 'divider',
+              '&:hover': {
+                borderColor: 'primary.main',
+                boxShadow: 1,
+              },
+            }}
+            onClick={() => setInput("What are the main topics covered in my documents?")}
+          >
+            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, mb: 0.5 }}>
+              📚 Explore
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Main topics in documents
+            </Typography>
+          </Card>
+          <Card
+            sx={{
+              p: 2,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              bgcolor: 'background.paper',
+              border: 1,
+              borderColor: 'divider',
+              '&:hover': {
+                borderColor: 'primary.main',
+                boxShadow: 1,
+              },
+            }}
+            onClick={() => setInput("Summarize the key information")}
+          >
+            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, mb: 0.5 }}>
+              ✨ Summarize
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Key information summary
+            </Typography>
+          </Card>
+          <Card
+            sx={{
+              p: 2,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              bgcolor: 'background.paper',
+              border: 1,
+              borderColor: 'divider',
+              '&:hover': {
+                borderColor: 'primary.main',
+                boxShadow: 1,
+              },
+            }}
+            onClick={() => setInput("What insights can you provide?")}
+          >
+            <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, mb: 0.5 }}>
+              💡 Insights
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Generate insights
+            </Typography>
+          </Card>
+        </Box>
+      )}
+    </Box>
   )
 }

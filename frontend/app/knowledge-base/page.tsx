@@ -2,11 +2,19 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { PageHeader } from "@/components/page-header"
-import { PageContainer } from "@/components/page-container"
+import {
+  Button,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Container,
+  Chip,
+  IconButton,
+  Collapse,
+  Paper
+} from "@mui/material"
+import { ExpandMore, ExpandLess, Visibility, Delete, Upload } from "@mui/icons-material"
 import { apiClient } from "@/lib/api"
 
 interface DocumentMetadata {
@@ -176,161 +184,238 @@ export default function KnowledgeBasePage() {
   const totalSize = documents.reduce((sum, doc) => sum + doc.fileSize, 0)
 
   return (
-    <PageContainer>
-        <PageHeader
-          title="Knowledge Base"
-          description="Manage and organize your documents for RAG search"
-        />
+    <Container maxWidth="xl">
+      {/* Page Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+          Knowledge Base
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Manage and organize your documents for RAG search
+        </Typography>
+      </Box>
 
-        {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-4">
-          <Card className="p-4 border border-border bg-card/50 backdrop-blur">
-            <p className="text-sm text-muted-foreground mb-1">Total Documents</p>
-            <p className="text-3xl font-bold text-primary">{documents.length}</p>
-          </Card>
-          <Card className="p-4 border border-border bg-card/50 backdrop-blur">
-            <p className="text-sm text-muted-foreground mb-1">Total Chunks</p>
-            <p className="text-3xl font-bold text-secondary">{totalChunks}</p>
-          </Card>
-          <Card className="p-4 border border-border bg-card/50 backdrop-blur">
-            <p className="text-sm text-muted-foreground mb-1">Storage Used</p>
-            <p className="text-3xl font-bold text-accent">{formatFileSize(totalSize)}</p>
-          </Card>
-        </div>
+      {/* Stats */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2, mb: 4 }}>
+        <Card sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Total Documents
+            </Typography>
+            <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold' }}>
+              {documents.length}
+            </Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Total Chunks
+            </Typography>
+            <Typography variant="h4" color="secondary.main" sx={{ fontWeight: 'bold' }}>
+              {totalChunks}
+            </Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Storage Used
+            </Typography>
+            <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
+              {formatFileSize(totalSize)}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
 
-        {/* Upload Area */}
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
-            isDragging ? "border-primary bg-primary/10" : "border-border bg-card/30 hover:border-primary/50"
-          }`}
-        >
-          <div className="space-y-2">
-            {isUploading ? (
-              <>
-                <p className="text-2xl">⏳</p>
-                <p className="font-semibold text-foreground">Uploading document...</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Please wait while we process your file
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-2xl">📤</p>
-                <p className="font-semibold text-foreground">Drag and drop your files here</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Supported formats: Markdown (.md), Text (.txt), PDF (.pdf)
-                </p>
-                <div>
-                  <input
-                    id="file-upload"
-                    type="file"
-                    multiple
-                    accept=".md,.txt,.pdf"
-                    onChange={handleFileInput}
-                    className="hidden"
-                    disabled={isUploading}
-                  />
-                  <label htmlFor="file-upload" className="cursor-pointer">
-                    <div className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/40 text-primary-foreground">
-                      {isUploading ? "Uploading..." : "or Click to Browse"}
-                    </div>
-                  </label>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Documents List */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Your Documents</h2>
-          {documents.length === 0 ? (
-            <Card className="p-8 text-center border border-border/50 bg-card/30">
-              <p className="text-muted-foreground">No documents yet. Upload your first document to get started!</p>
-            </Card>
+      {/* Upload Area */}
+      <Paper
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        sx={{
+          border: 2,
+          borderStyle: 'dashed',
+          borderColor: isDragging ? 'primary.main' : 'divider',
+          bgcolor: isDragging ? 'primary.light' : 'background.paper',
+          borderRadius: 2,
+          p: 4,
+          textAlign: 'center',
+          transition: 'all 0.2s',
+          cursor: 'pointer',
+          '&:hover': {
+            borderColor: 'primary.main',
+            bgcolor: 'action.hover',
+          },
+          mb: 4
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          {isUploading ? (
+            <>
+              <Typography sx={{ fontSize: '2rem' }}>⏳</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Uploading document...
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Please wait while we process your file
+              </Typography>
+            </>
           ) : (
-            <div className="space-y-3">
-              {documents.map((doc) => {
-                // Since backend doesn't return metadata, we'll provide defaults
-                const categoryInfo = getCategoryInfo("other")
-                const fileType = doc.filename.endsWith(".pdf") ? "pdf" :
-                                doc.filename.endsWith(".md") ? "markdown" : "txt"
-                return (
-                  <Card
-                    key={doc.id}
-                    className="border border-border bg-card/50 backdrop-blur hover:border-primary/50 transition-all cursor-pointer"
+            <>
+              <Upload sx={{ fontSize: '3rem', color: 'primary.main' }} />
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Drag and drop your files here
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Supported formats: Markdown (.md), Text (.txt), PDF (.pdf)
+              </Typography>
+              <Box>
+                <input
+                  id="file-upload"
+                  type="file"
+                  multiple
+                  accept=".md,.txt,.pdf"
+                  onChange={handleFileInput}
+                  style={{ display: 'none' }}
+                  disabled={isUploading}
+                />
+                <label htmlFor="file-upload" style={{ cursor: 'pointer' }}>
+                  <Button
+                    component="span"
+                    variant="contained"
+                    disabled={isUploading}
+                    sx={{
+                      background: 'linear-gradient(45deg, #2563eb, #7c3aed)',
+                      '&:hover': {
+                        background: 'linear-gradient(45deg, #1d4ed8, #6d28d9)',
+                        boxShadow: '0 8px 25px rgba(37, 99, 235, 0.3)',
+                      },
+                    }}
                   >
-                    <div className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-4 flex-1">
-                          <span className="text-2xl">{getTypeIcon(fileType)}</span>
-                          <div className="flex-1">
-                            <p className="font-semibold text-foreground">{doc.filename}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatFileSize(doc.fileSize)} • {doc.chunkCount} chunks • Uploaded {formatDate(doc.createdAt)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setExpandedDoc(expandedDoc === doc.id.toString() ? null : doc.id.toString())}
-                            className="text-xs"
-                          >
-                            {expandedDoc === doc.id.toString() ? "Hide" : "Show"} Details
-                          </Button>
-                          <Button variant="outline" size="sm" className="text-xs bg-transparent">
-                            View
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-xs text-destructive hover:bg-destructive/10 bg-transparent"
-                            onClick={() => deleteDocument(doc.id)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </div>
-
-                      {expandedDoc === doc.id.toString() && (
-                        <div className="border-t border-border pt-4 mt-4 space-y-3">
-                          <div>
-                            <p className="text-xs font-semibold text-muted-foreground mb-2">Document Type</p>
-                            <div
-                              className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${categoryInfo.color}`}
-                            >
-                              {categoryInfo.icon} {categoryInfo.label}
-                            </div>
-                          </div>
-
-                          <div>
-                            <p className="text-xs font-semibold text-muted-foreground mb-1">Status</p>
-                            <p className="text-sm text-foreground">{doc.status}</p>
-                          </div>
-
-                          <div>
-                            <p className="text-xs font-semibold text-muted-foreground mb-1">Title</p>
-                            <p className="text-sm text-foreground">{doc.title || doc.filename}</p>
-                          </div>
-
-                          <div>
-                            <p className="text-xs font-semibold text-muted-foreground mb-1">Last Updated</p>
-                            <p className="text-sm text-foreground">{formatDate(doc.updatedAt)}</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                )
-              })}
-            </div>
+                    {isUploading ? "Uploading..." : "or Click to Browse"}
+                  </Button>
+                </label>
+              </Box>
+            </>
           )}
-        </div>
-    </PageContainer>
+        </Box>
+      </Paper>
+
+      {/* Documents List */}
+      <Box>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
+          Your Documents
+        </Typography>
+        {documents.length === 0 ? (
+          <Card sx={{ bgcolor: 'background.paper', borderRadius: 2 }}>
+            <CardContent sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="body1" color="text.secondary">
+                No documents yet. Upload your first document to get started!
+              </Typography>
+            </CardContent>
+          </Card>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {documents.map((doc) => {
+              // Since backend doesn't return metadata, we'll provide defaults
+              const categoryInfo = getCategoryInfo("other")
+              const fileType = doc.filename.endsWith(".pdf") ? "pdf" :
+                              doc.filename.endsWith(".md") ? "markdown" : "txt"
+              const isExpanded = expandedDoc === doc.id.toString()
+
+              return (
+                <Card
+                  key={doc.id}
+                  sx={{
+                    bgcolor: 'background.paper',
+                    borderRadius: 2,
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      boxShadow: 2,
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+                        <Typography sx={{ fontSize: '1.5rem' }}>{getTypeIcon(fileType)}</Typography>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {doc.filename}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {formatFileSize(doc.fileSize)} • {doc.chunkCount} chunks • Uploaded {formatDate(doc.createdAt)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Button
+                          size="small"
+                          onClick={() => setExpandedDoc(isExpanded ? null : doc.id.toString())}
+                          endIcon={isExpanded ? <ExpandLess /> : <ExpandMore />}
+                        >
+                          {isExpanded ? "Hide" : "Show"} Details
+                        </Button>
+                        <IconButton size="small" color="primary">
+                          <Visibility />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => deleteDocument(doc.id)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </Box>
+
+                    <Collapse in={isExpanded}>
+                      <Box sx={{ borderTop: 1, borderColor: 'divider', pt: 2, mt: 2 }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 1, display: 'block' }}>
+                              Document Type
+                            </Typography>
+                            <Chip
+                              label={`${categoryInfo.icon} ${categoryInfo.label}`}
+                              size="small"
+                              variant="outlined"
+                            />
+                          </Box>
+
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5, display: 'block' }}>
+                              Status
+                            </Typography>
+                            <Typography variant="body2">{doc.status}</Typography>
+                          </Box>
+
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5, display: 'block' }}>
+                              Title
+                            </Typography>
+                            <Typography variant="body2">{doc.title || doc.filename}</Typography>
+                          </Box>
+
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5, display: 'block' }}>
+                              Last Updated
+                            </Typography>
+                            <Typography variant="body2">{formatDate(doc.updatedAt)}</Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Collapse>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </Box>
+        )}
+      </Box>
+    </Container>
   )
 }

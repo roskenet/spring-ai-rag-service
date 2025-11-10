@@ -1,10 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { PageHeader } from "@/components/page-header"
-import { PageContainer } from "@/components/page-container"
+import {
+  Button,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Container,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Slider,
+  Checkbox,
+  FormControlLabel,
+  Alert,
+  CircularProgress
+} from "@mui/material"
 import { apiClient } from "@/lib/api"
 import type { RagConfiguration } from "@/lib/api"
 
@@ -156,234 +169,296 @@ export default function ConfigPage() {
   }
 
   return (
-    <PageContainer>
-        <PageHeader
-          title="Configuration"
-          description="Fine-tune your RAG system parameters"
-        />
+    <Container maxWidth="xl">
+      {/* Page Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+          Configuration
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Fine-tune your RAG system parameters
+        </Typography>
+      </Box>
 
-        {/* Notifications */}
-        {saved && (
-          <div className="p-4 bg-primary/10 border border-primary/30 rounded-lg">
-            <p className="text-sm text-primary font-semibold">Settings saved successfully!</p>
-          </div>
-        )}
+      {/* Notifications */}
+      {saved && (
+        <Alert severity="success" sx={{ mb: 3 }}>
+          Settings saved successfully!
+        </Alert>
+      )}
 
-        {isLoading && (
-          <div className="p-4 bg-secondary/10 border border-secondary/30 rounded-lg">
-            <p className="text-sm text-secondary font-semibold">Loading configuration...</p>
-          </div>
-        )}
+      {isLoading && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <CircularProgress size={20} />
+            Loading configuration...
+          </Box>
+        </Alert>
+      )}
 
-        {/* Embeddings Configuration */}
-        <Card className="border border-border bg-card/50 backdrop-blur p-6">
-          <h2 className="text-xl font-semibold mb-4 text-foreground">Embeddings Configuration</h2>
+      {/* Embeddings Configuration */}
+      <Card sx={{ bgcolor: 'background.paper', borderRadius: 2, mb: 3 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
+            Embeddings Configuration
+          </Typography>
 
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-foreground block mb-2">Embeddings Model</label>
-              <select
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <FormControl fullWidth>
+              <InputLabel>Embeddings Model</InputLabel>
+              <Select
                 value={config.embeddingsModel}
+                label="Embeddings Model"
                 onChange={(e) => handleChange("embeddingsModel", e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="text-embedding-3-small">text-embedding-3-small</option>
-                <option value="text-embedding-3-large">text-embedding-3-large</option>
-                <option value="text-embedding-ada-002">text-embedding-ada-002</option>
-              </select>
-              <p className="text-xs text-muted-foreground mt-1">Model used for creating document embeddings</p>
-            </div>
+                <MenuItem value="text-embedding-3-small">text-embedding-3-small</MenuItem>
+                <MenuItem value="text-embedding-3-large">text-embedding-3-large</MenuItem>
+                <MenuItem value="text-embedding-ada-002">text-embedding-ada-002</MenuItem>
+              </Select>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                Model used for creating document embeddings
+              </Typography>
+            </FormControl>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">Chunk Size: {config.chunkSize}</label>
-                <input
-                  type="range"
-                  min="256"
-                  max="2048"
-                  step="256"
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 2 }}>
+                  Chunk Size: {config.chunkSize}
+                </Typography>
+                <Slider
                   value={config.chunkSize}
-                  onChange={(e) => handleChange("chunkSize", Number.parseInt(e.target.value))}
-                  className="w-full"
+                  onChange={(_, value) => handleChange("chunkSize", value as number)}
+                  min={256}
+                  max={2048}
+                  step={256}
+                  marks
+                  valueLabelDisplay="auto"
                 />
-                <p className="text-xs text-muted-foreground mt-1">Size of document chunks in tokens</p>
-              </div>
+                <Typography variant="caption" color="text.secondary">
+                  Size of document chunks in tokens
+                </Typography>
+              </Box>
 
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 2 }}>
                   Overlap: {config.overlapPercentage}%
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="50"
-                  step="5"
+                </Typography>
+                <Slider
                   value={config.overlapPercentage}
-                  onChange={(e) => handleChange("overlapPercentage", Number.parseInt(e.target.value))}
-                  className="w-full"
+                  onChange={(_, value) => handleChange("overlapPercentage", value as number)}
+                  min={0}
+                  max={50}
+                  step={5}
+                  marks
+                  valueLabelDisplay="auto"
                 />
-                <p className="text-xs text-muted-foreground mt-1">Overlap between consecutive chunks</p>
-              </div>
-            </div>
-          </div>
-        </Card>
+                <Typography variant="caption" color="text.secondary">
+                  Overlap between consecutive chunks
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
 
-        <Card className="border border-border bg-card/50 backdrop-blur p-6">
-          <h2 className="text-xl font-semibold mb-4 text-foreground">Chunking Strategy</h2>
+      <Card sx={{ bgcolor: 'background.paper', borderRadius: 2, mb: 3 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
+            Chunking Strategy
+          </Typography>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
             {Object.entries(CHUNKING_STRATEGIES).map(([key, strategy]) => (
-              <div
+              <Card
                 key={key}
                 onClick={() => handleChange("chunkingStrategy", key)}
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                  config.chunkingStrategy === key
-                    ? "border-primary bg-primary/10"
-                    : "border-border bg-card/50 hover:border-primary/50"
-                }`}
+                sx={{
+                  border: 2,
+                  borderColor: config.chunkingStrategy === key ? 'primary.main' : 'divider',
+                  bgcolor: config.chunkingStrategy === key ? 'primary.light' : 'background.paper',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    bgcolor: config.chunkingStrategy === key ? 'primary.light' : 'action.hover',
+                  },
+                }}
               >
-                <div className="flex items-start gap-3">
-                  <span className="text-3xl">{strategy.icon}</span>
-                  <div className="flex-1">
-                    <p className="font-semibold text-foreground text-sm">{strategy.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{strategy.description}</p>
-                  </div>
-                </div>
-              </div>
+                <CardContent sx={{ p: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    <Typography sx={{ fontSize: '1.5rem' }}>{strategy.icon}</Typography>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        {strategy.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {strategy.description}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
             ))}
-          </div>
-        </Card>
+          </Box>
+        </CardContent>
+      </Card>
 
-        {/* Retrieval Configuration */}
-        <Card className="border border-border bg-card/50 backdrop-blur p-6">
-          <h2 className="text-xl font-semibold mb-4 text-foreground">Retrieval Configuration</h2>
+      {/* Retrieval Configuration */}
+      <Card sx={{ bgcolor: 'background.paper', borderRadius: 2, mb: 3 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
+            Retrieval Configuration
+          </Typography>
 
-          <div className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 2 }}>
                   Similarity Threshold: {config.similarityThreshold.toFixed(2)}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
+                </Typography>
+                <Slider
                   value={config.similarityThreshold}
-                  onChange={(e) => handleChange("similarityThreshold", Number.parseFloat(e.target.value))}
-                  className="w-full"
+                  onChange={(_, value) => handleChange("similarityThreshold", value as number)}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  marks
+                  valueLabelDisplay="auto"
                 />
-                <p className="text-xs text-muted-foreground mt-1">Minimum similarity score for retrieval</p>
-              </div>
+                <Typography variant="caption" color="text.secondary">
+                  Minimum similarity score for retrieval
+                </Typography>
+              </Box>
 
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 2 }}>
                   Max Results: {config.maxResults}
-                </label>
-                <input
-                  type="range"
-                  min="1"
-                  max="20"
-                  step="1"
+                </Typography>
+                <Slider
                   value={config.maxResults}
-                  onChange={(e) => handleChange("maxResults", Number.parseInt(e.target.value))}
-                  className="w-full"
+                  onChange={(_, value) => handleChange("maxResults", value as number)}
+                  min={1}
+                  max={20}
+                  step={1}
+                  marks
+                  valueLabelDisplay="auto"
                 />
-                <p className="text-xs text-muted-foreground mt-1">Maximum number of results to retrieve</p>
-              </div>
-            </div>
+                <Typography variant="caption" color="text.secondary">
+                  Maximum number of results to retrieve
+                </Typography>
+              </Box>
+            </Box>
 
-            <div>
-              <label className="text-sm font-medium text-foreground block mb-2">
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 500, mb: 2 }}>
                 Top K for Re-ranking: {config.topK}
-              </label>
-              <input
-                type="range"
-                min="5"
-                max="50"
-                step="5"
+              </Typography>
+              <Slider
                 value={config.topK}
-                onChange={(e) => handleChange("topK", Number.parseInt(e.target.value))}
-                className="w-full"
+                onChange={(_, value) => handleChange("topK", value as number)}
+                min={5}
+                max={50}
+                step={5}
+                marks
+                valueLabelDisplay="auto"
               />
-              <p className="text-xs text-muted-foreground mt-1">Number of results to re-rank</p>
-            </div>
+              <Typography variant="caption" color="text.secondary">
+                Number of results to re-rank
+              </Typography>
+            </Box>
 
-            <div className="border-t border-border pt-4">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={config.includeCitations}
-                  onChange={(e) => handleChange("includeCitations", e.target.checked)}
-                  className="w-4 h-4 accent-primary"
-                />
-                <span className="text-sm font-medium text-foreground">Include Source Citations</span>
-              </label>
-              <p className="text-xs text-muted-foreground mt-2">
+            <Box sx={{ borderTop: 1, borderColor: 'divider', pt: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.includeCitations}
+                    onChange={(e) => handleChange("includeCitations", e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Include Source Citations"
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
                 Enable to show document source and chunk references in RAG responses
-              </p>
-            </div>
-          </div>
-        </Card>
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
 
-        {/* Generation Configuration */}
-        <Card className="border border-border bg-card/50 backdrop-blur p-6">
-          <h2 className="text-xl font-semibold mb-4 text-foreground">Generation Configuration</h2>
+      {/* Generation Configuration */}
+      <Card sx={{ bgcolor: 'background.paper', borderRadius: 2, mb: 3 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
+            Generation Configuration
+          </Typography>
 
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-2">
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 500, mb: 2 }}>
               Temperature: {config.temperature.toFixed(2)}
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="2"
-              step="0.1"
+            </Typography>
+            <Slider
               value={config.temperature}
-              onChange={(e) => handleChange("temperature", Number.parseFloat(e.target.value))}
-              className="w-full"
+              onChange={(_, value) => handleChange("temperature", value as number)}
+              min={0}
+              max={2}
+              step={0.1}
+              marks
+              valueLabelDisplay="auto"
             />
-            <p className="text-xs text-muted-foreground mt-1">
+            <Typography variant="caption" color="text.secondary">
               Controls randomness (0 = deterministic, 2 = very random)
-            </p>
-          </div>
-        </Card>
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
 
-        {/* Advanced Settings Info */}
-        <Card className="border border-border/50 bg-secondary/10 p-6 mb-8">
-          <h3 className="font-semibold text-foreground mb-2">Parameter Guide</h3>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>
+      {/* Advanced Settings Info */}
+      <Card sx={{ bgcolor: 'secondary.light', borderRadius: 2, mb: 4 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            Parameter Guide
+          </Typography>
+          <Box component="ul" sx={{ pl: 0, m: 0, listStyle: 'none' }}>
+            <Typography component="li" variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               • <strong>Embeddings Model:</strong> Choose between different embedding dimensions and performance
-            </li>
-            <li>
+            </Typography>
+            <Typography component="li" variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               • <strong>Chunking Strategy:</strong> Select the best strategy for your document types
-            </li>
-            <li>
+            </Typography>
+            <Typography component="li" variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               • <strong>Chunk Size:</strong> Larger chunks preserve context, smaller chunks increase retrieval precision
-            </li>
-            <li>
+            </Typography>
+            <Typography component="li" variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               • <strong>Similarity Threshold:</strong> Higher values retrieve only more relevant documents
-            </li>
-            <li>
+            </Typography>
+            <Typography component="li" variant="body2" color="text.secondary">
               • <strong>Include Citations:</strong> Enhance transparency by showing source references
-            </li>
-          </ul>
-        </Card>
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
 
-        {/* Action Buttons */}
-        <div className="flex gap-4 justify-end">
-          <Button variant="outline" onClick={handleReset} className="border-border hover:bg-background bg-transparent">
-            Reset to Defaults
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/40 transition-all"
-          >
-            {isSaving ? "Saving..." : "Save Configuration"}
-          </Button>
-        </div>
-    </PageContainer>
+      {/* Action Buttons */}
+      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+        <Button variant="outlined" onClick={handleReset}>
+          Reset to Defaults
+        </Button>
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          variant="contained"
+          sx={{
+            background: 'linear-gradient(45deg, #2563eb, #7c3aed)',
+            '&:hover': {
+              background: 'linear-gradient(45deg, #1d4ed8, #6d28d9)',
+              boxShadow: '0 8px 25px rgba(37, 99, 235, 0.3)',
+            },
+          }}
+        >
+          {isSaving ? "Saving..." : "Save Configuration"}
+        </Button>
+      </Box>
+    </Container>
   )
 }

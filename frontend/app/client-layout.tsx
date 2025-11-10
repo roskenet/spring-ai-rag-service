@@ -6,6 +6,8 @@ import { Analytics } from "@vercel/analytics/next"
 import { useState, useEffect, createContext, useContext } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { ThemeProvider as MuiThemeProvider, CssBaseline, AppBar, Toolbar, Box, Typography, Container } from "@mui/material"
+import { lightTheme, darkTheme } from "@/lib/mui-theme"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -50,7 +52,26 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  return <ThemeContext.Provider value={{ isDark, toggleTheme }}>{children}</ThemeContext.Provider>
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!isMounted) {
+    return (
+      <ThemeContext.Provider value={{ isDark: false, toggleTheme: () => {} }}>
+        <MuiThemeProvider theme={lightTheme}>
+          <CssBaseline />
+          {children}
+        </MuiThemeProvider>
+      </ThemeContext.Provider>
+    )
+  }
+
+  return (
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+      <MuiThemeProvider theme={isDark ? darkTheme : lightTheme}>
+        <CssBaseline />
+        {children}
+      </MuiThemeProvider>
+    </ThemeContext.Provider>
+  )
 }
 
 function AppShell({ children }: { children: React.ReactNode }) {
@@ -63,62 +84,93 @@ function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+    <Box sx={{ minHeight: '100vh' }}>
       {/* Header Navigation */}
-      <nav className="border-b border-border backdrop-blur-md bg-background/80 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      <AppBar position="sticky" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Container maxWidth="xl">
+          <Toolbar sx={{ justifyContent: 'space-between' }}>
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg"></div>
-              <span className="text-lg font-bold">ZEOS Knowledge</span>
+            <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+                    borderRadius: 1,
+                  }}
+                />
+                <Typography variant="h6" component="span" sx={{ fontWeight: 700 }}>
+                  ZEOS Knowledge
+                </Typography>
+              </Box>
             </Link>
 
             {/* Navigation Links */}
-            <div className="flex items-center gap-4">
-              <Link
-                href="/chat"
-                className={`text-sm transition-colors hover:text-primary ${
-                  isActive("/chat") ? "font-semibold text-primary" : ""
-                }`}
-              >
-                Chat
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Link href="/chat" style={{ textDecoration: 'none' }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isActive("/chat") ? 'primary.main' : 'text.primary',
+                    fontWeight: isActive("/chat") ? 600 : 400,
+                    '&:hover': { color: 'primary.main' },
+                    transition: 'color 0.2s',
+                  }}
+                >
+                  Chat
+                </Typography>
               </Link>
-              <Link
-                href="/knowledge-base"
-                className={`text-sm transition-colors hover:text-primary ${
-                  isActive("/knowledge-base") ? "font-semibold text-primary" : ""
-                }`}
-              >
-                Knowledge Base
+              <Link href="/knowledge-base" style={{ textDecoration: 'none' }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isActive("/knowledge-base") ? 'primary.main' : 'text.primary',
+                    fontWeight: isActive("/knowledge-base") ? 600 : 400,
+                    '&:hover': { color: 'primary.main' },
+                    transition: 'color 0.2s',
+                  }}
+                >
+                  Knowledge Base
+                </Typography>
               </Link>
-              <Link
-                href="/analytics"
-                className={`text-sm transition-colors hover:text-primary ${
-                  isActive("/analytics") ? "font-semibold text-primary" : ""
-                }`}
-              >
-                Analytics
+              <Link href="/analytics" style={{ textDecoration: 'none' }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isActive("/analytics") ? 'primary.main' : 'text.primary',
+                    fontWeight: isActive("/analytics") ? 600 : 400,
+                    '&:hover': { color: 'primary.main' },
+                    transition: 'color 0.2s',
+                  }}
+                >
+                  Analytics
+                </Typography>
               </Link>
-              <Link
-                href="/config"
-                className={`text-sm transition-colors hover:text-primary ${
-                  isActive("/config") ? "font-semibold text-primary" : ""
-                }`}
-              >
-                Settings
+              <Link href="/config" style={{ textDecoration: 'none' }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isActive("/config") ? 'primary.main' : 'text.primary',
+                    fontWeight: isActive("/config") ? 600 : 400,
+                    '&:hover': { color: 'primary.main' },
+                    transition: 'color 0.2s',
+                  }}
+                >
+                  Settings
+                </Typography>
               </Link>
               <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </nav>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <Container maxWidth="xl" sx={{ py: 4 }}>
         {children}
-      </main>
-    </div>
+      </Container>
+    </Box>
   )
 }
 

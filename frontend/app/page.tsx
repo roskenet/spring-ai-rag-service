@@ -1,63 +1,160 @@
 import Link from "next/link"
-import { Search, Upload, Settings } from "lucide-react"
-import { PageContainer } from "@/components/page-container"
+import { Box, Typography, Button, Card, CardContent, Avatar } from "@mui/material"
+import { Search, Upload, Settings } from "@mui/icons-material"
 
 export default function Home() {
   return (
-    <PageContainer>
-        <div className="text-center space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              Intelligent Knowledge Search
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Ask questions about your documents and get accurate answers powered by advanced AI technology
-            </p>
-          </div>
+    <Box>
+      {/* Hero Section */}
+      <Box sx={{ textAlign: 'center', py: 8 }}>
+        <Typography
+          variant="h1"
+          sx={{
+            fontSize: { xs: '2.5rem', md: '4rem' },
+            fontWeight: 700,
+            background: 'linear-gradient(45deg, #2563eb, #7c3aed, #3b82f6)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            color: 'transparent',
+            mb: 2,
+          }}
+        >
+          Intelligent Knowledge Search
+        </Typography>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Link
-              href="/chat"
-              className="px-8 py-3 bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/40 transition-all"
+        <Typography
+          variant="h5"
+          color="text.secondary"
+          sx={{ maxWidth: '600px', mx: 'auto', mb: 4 }}
+        >
+          Ask questions about your documents and get accurate answers powered by advanced AI technology
+        </Typography>
+
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center' }}>
+          <Link href="/chat" style={{ textDecoration: 'none' }}>
+            <Button
+              variant="contained"
+              size="large"
+              sx={{
+                px: 4,
+                py: 1.5,
+                background: 'linear-gradient(45deg, #2563eb, #7c3aed)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #1d4ed8, #6d28d9)',
+                  boxShadow: '0 8px 25px rgba(37, 99, 235, 0.3)',
+                },
+              }}
             >
               Start Chatting
-            </Link>
-            <Link
-              href="/knowledge-base"
-              className="px-8 py-3 border border-primary text-primary rounded-lg font-semibold hover:bg-primary/10 transition-colors"
+            </Button>
+          </Link>
+          <Link href="/knowledge-base" style={{ textDecoration: 'none' }}>
+            <Button
+              variant="outlined"
+              size="large"
+              sx={{ px: 4, py: 1.5 }}
             >
               Manage Documents
-            </Link>
-          </div>
-        </div>
+            </Button>
+          </Link>
+        </Box>
+      </Box>
 
-        <div className="grid md:grid-cols-3 gap-6 mt-20">
-          <div className="p-6 rounded-lg border border-border bg-card/50 backdrop-blur hover:border-primary/50 transition-colors">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg mb-4 flex items-center justify-center">
-              <Search className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="font-semibold mb-2">Smart Search</h3>
-            <p className="text-sm text-muted-foreground">
+      {/* Features Section */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3, mt: 8 }}>
+        <Card
+          sx={{
+            height: '100%',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              borderColor: 'primary.main',
+              boxShadow: 3,
+            },
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Avatar
+              sx={{
+                width: 56,
+                height: 56,
+                mb: 2,
+                bgcolor: 'primary.main',
+                background: 'linear-gradient(45deg, rgba(37, 99, 235, 0.2), rgba(124, 58, 237, 0.2))',
+              }}
+            >
+              <Search color="primary" />
+            </Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+              Smart Search
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
               Search across your entire knowledge base with semantic understanding
-            </p>
-          </div>
-          <div className="p-6 rounded-lg border border-border bg-card/50 backdrop-blur hover:border-primary/50 transition-colors">
-            <div className="w-12 h-12 bg-gradient-to-br from-secondary/20 to-accent/20 rounded-lg mb-4 flex items-center justify-center">
-              <Upload className="w-6 h-6 text-secondary" />
-            </div>
-            <h3 className="font-semibold mb-2">Easy Upload</h3>
-            <p className="text-sm text-muted-foreground">
+            </Typography>
+          </CardContent>
+        </Card>
+
+        <Card
+          sx={{
+            height: '100%',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              borderColor: 'primary.main',
+              boxShadow: 3,
+            },
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Avatar
+              sx={{
+                width: 56,
+                height: 56,
+                mb: 2,
+                bgcolor: 'secondary.main',
+                background: 'linear-gradient(45deg, rgba(124, 58, 237, 0.2), rgba(59, 130, 246, 0.2))',
+              }}
+            >
+              <Upload color="secondary" />
+            </Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+              Easy Upload
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
               Upload markdown, txt, and pdf files to build your knowledge base
-            </p>
-          </div>
-          <div className="p-6 rounded-lg border border-border bg-card/50 backdrop-blur hover:border-primary/50 transition-colors">
-            <div className="w-12 h-12 bg-gradient-to-br from-accent/20 to-primary/20 rounded-lg mb-4 flex items-center justify-center">
-              <Settings className="w-6 h-6 text-accent" />
-            </div>
-            <h3 className="font-semibold mb-2">Configure</h3>
-            <p className="text-sm text-muted-foreground">Fine-tune embeddings, models, and similarity thresholds</p>
-          </div>
-        </div>
-    </PageContainer>
+            </Typography>
+          </CardContent>
+        </Card>
+
+        <Card
+          sx={{
+            height: '100%',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              borderColor: 'primary.main',
+              boxShadow: 3,
+            },
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Avatar
+              sx={{
+                width: 56,
+                height: 56,
+                mb: 2,
+                bgcolor: 'info.main',
+                background: 'linear-gradient(45deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2))',
+              }}
+            >
+              <Settings color="info" />
+            </Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+              Configure
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Fine-tune embeddings, models, and similarity thresholds
+            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
+    </Box>
   )
 }
