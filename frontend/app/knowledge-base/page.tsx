@@ -40,6 +40,8 @@ export default function KnowledgeBasePage() {
   const [expandedDoc, setExpandedDoc] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isUploading, setIsUploading] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [uploadErrors, setUploadErrors] = useState<string[]>([])
 
   // Load documents from backend on component mount
   useEffect(() => {
@@ -67,66 +69,100 @@ export default function KnowledgeBasePage() {
     setIsDragging(false)
   }
 
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-
-    const files = Array.from(e.dataTransfer.files)
+  const validateAndProcessFiles = (files: File[]) => {
     const supportedTypes = ["text/markdown", "text/plain", "application/pdf"]
+    const supportedExtensions = [".md", ".txt", ".pdf"]
 
-    for (const file of files) {
-      if (
-        supportedTypes.some(
-          (type) =>
-            file.type.includes(type) ||
-            file.name.endsWith(".md") ||
-            file.name.endsWith(".txt") ||
-            file.name.endsWith(".pdf"),
-        )
-      ) {
-        await uploadFile(file);
+    const validFiles: File[] = []
+    const errors: string[] = []
+
+    files.forEach(file => {
+      const isValidType = supportedTypes.some(type => file.type.includes(type))
+      const isValidExtension = supportedExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+
+      if (isValidType || isValidExtension) {
+        validFiles.push(file)
+      } else {
+        errors.push(`"${file.name}" is not supported. Only .md, .txt, and .pdf files are allowed.`)
       }
+    })
+
+    if (errors.length > 0) {
+      setUploadErrors(errors)
+    }
+
+    if (validFiles.length > 0) {
+      setSelectedFiles(prev => [...prev, ...validFiles])
     }
   }
 
-  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    const supportedTypes = ["text/markdown", "text/plain", "application/pdf"]
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    setUploadErrors([]) // Clear previous errors
 
-    for (const file of files) {
-      if (
-        supportedTypes.some(
-          (type) =>
-            file.type.includes(type) ||
-            file.name.endsWith(".md") ||
-            file.name.endsWith(".txt") ||
-            file.name.endsWith(".pdf"),
-        )
-      ) {
-        await uploadFile(file);
-      }
-    }
+    const files = Array.from(e.dataTransfer.files)
+    validateAndProcessFiles(files)
+  }
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadErrors([]) // Clear previous errors
+
+    const files = Array.from(e.target.files || [])
+    validateAndProcessFiles(files)
 
     // Clear the file input to allow re-selecting the same file
     e.target.value = '';
   }
 
-  const uploadFile = async (file: File) => {
+  const uploadSelectedFiles = async () => {
+    if (selectedFiles.length === 0) return;
+
     try {
       setIsUploading(true);
-      const response = await apiClient.uploadDocument(file);
+      setUploadErrors([]); // Clear any previous errors
+      let successCount = 0;
+      let errorCount = 0;
+      const uploadErrors: string[] = [];
 
-      if (response.success) {
-        // Reload documents to show the newly uploaded file
-        await loadDocuments();
-      } else {
-        console.error('Upload failed:', response.message);
+      for (const file of selectedFiles) {
+        try {
+          const response = await apiClient.uploadDocument(file);
+
+          if (response.success) {
+            successCount++;
+          } else {
+            errorCount++;
+            uploadErrors.push(`Failed to upload "${file.name}": ${response.message}`);
+          }
+        } catch (error) {
+          errorCount++;
+          uploadErrors.push(`Failed to upload "${file.name}": ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
       }
+
+      // Show upload errors if any
+      if (uploadErrors.length > 0) {
+        setUploadErrors(uploadErrors);
+      }
+
+      // Clear selected files and reload documents
+      setSelectedFiles([]);
+      await loadDocuments();
+
     } catch (error) {
-      console.error('Failed to upload file:', error);
+      setUploadErrors([`Upload process failed: ${error instanceof Error ? error.message : 'Unknown error'}`]);
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const clearSelectedFiles = () => {
+    setSelectedFiles([]);
   };
 
   const deleteDocument = async (id: number) => {
@@ -229,79 +265,166 @@ export default function KnowledgeBasePage() {
         </Card>
       </Box>
 
-      {/* Upload Area */}
-      <Paper
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        sx={{
-          border: 2,
-          borderStyle: 'dashed',
-          borderColor: isDragging ? 'primary.main' : 'divider',
-          bgcolor: isDragging ? 'primary.light' : 'background.paper',
-          borderRadius: 2,
-          p: 4,
-          textAlign: 'center',
-          transition: 'all 0.2s',
-          cursor: 'pointer',
-          '&:hover': {
-            borderColor: 'primary.main',
-            bgcolor: 'action.hover',
-          },
-          mb: 4
-        }}
-      >
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-          {isUploading ? (
-            <>
-              <Typography sx={{ fontSize: '2rem' }}>⏳</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Uploading document...
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Please wait while we process your file
-              </Typography>
-            </>
-          ) : (
-            <>
-              <Upload sx={{ fontSize: '3rem', color: 'primary.main' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Drag and drop your files here
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Supported formats: Markdown (.md), Text (.txt), PDF (.pdf)
-              </Typography>
-              <Box>
-                <input
-                  id="file-upload"
-                  type="file"
-                  multiple
-                  accept=".md,.txt,.pdf"
-                  onChange={handleFileInput}
-                  style={{ display: 'none' }}
+      <Card sx={{ bgcolor: 'background.paper', borderRadius: 2, mb: 4 }}>
+        <CardContent sx={{ p: 4 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+            Upload Documents
+          </Typography>
+
+          {/* Error Messages */}
+          {uploadErrors.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              {uploadErrors.map((error, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    p: 2,
+                    mb: 1,
+                    bgcolor: 'error.light',
+                    color: 'error.contrastText',
+                    borderRadius: 1,
+                    border: 1,
+                    borderColor: 'error.main'
+                  }}
+                >
+                  <Typography variant="body2">{error}</Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+
+          {/* Drag and Drop Area with Hidden File Input */}
+          <Paper
+            component="label"
+            htmlFor="file-upload"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            sx={{
+              border: 2,
+              borderStyle: 'dashed',
+              borderColor: isDragging ? 'primary.main' : uploadErrors.length > 0 ? 'error.main' : 'divider',
+              bgcolor: isDragging ? 'primary.light' : 'transparent',
+              borderRadius: 2,
+              p: 4,
+              textAlign: 'center',
+              transition: 'all 0.2s',
+              cursor: 'pointer',
+              display: 'block',
+              '&:hover': {
+                borderColor: 'primary.main',
+                bgcolor: 'action.hover',
+              },
+              mb: selectedFiles.length > 0 ? 3 : 0
+            }}
+          >
+            <input
+              id="file-upload"
+              type="file"
+              multiple
+              accept=".md,.txt,.pdf"
+              onChange={handleFileInput}
+              style={{ display: 'none' }}
+            />
+            <Upload sx={{ fontSize: '3rem', color: 'primary.main', mb: 2 }} />
+            <Typography variant="h6" sx={{ fontWeight: 500, mb: 1 }}>
+              Drop files here or click to browse
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Supported formats: .md, .txt, .pdf
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              You can select multiple files at once
+            </Typography>
+          </Paper>
+
+          {/* Selected Files Display */}
+          {selectedFiles.length > 0 && (
+            <Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  Ready to Upload ({selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''})
+                </Typography>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={clearSelectedFiles}
                   disabled={isUploading}
-                />
-                <label htmlFor="file-upload" style={{ cursor: 'pointer' }}>
-                  <Button
-                    component="span"
-                    variant="contained"
-                    disabled={isUploading}
+                >
+                  Clear All
+                </Button>
+              </Box>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 3 }}>
+                {selectedFiles.map((file, index) => (
+                  <Box
+                    key={index}
                     sx={{
-                      background: 'linear-gradient(45deg, #2563eb, #7c3aed)',
-                      '&:hover': {
-                        background: 'linear-gradient(45deg, #1d4ed8, #6d28d9)',
-                        boxShadow: '0 8px 25px rgba(37, 99, 235, 0.3)',
-                      },
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      p: 2,
+                      border: 1,
+                      borderColor: 'success.main',
+                      borderRadius: 1,
+                      bgcolor: 'success.light'
                     }}
                   >
-                    {isUploading ? "Uploading..." : "or Click to Browse"}
-                  </Button>
-                </label>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Typography sx={{ fontSize: '1.5rem' }}>
+                        {file.name.endsWith('.pdf') ? '📄' : file.name.endsWith('.md') ? '📝' : '📋'}
+                      </Typography>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500, color: 'success.contrastText' }}>
+                          {file.name}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'success.contrastText', opacity: 0.8 }}>
+                          {formatFileSize(file.size)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <IconButton
+                      size="small"
+                      onClick={() => removeSelectedFile(index)}
+                      disabled={isUploading}
+                      sx={{ color: 'success.contrastText' }}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </Box>
+                ))}
               </Box>
-            </>
+
+              {/* Upload Button */}
+              <Box sx={{ textAlign: 'center' }}>
+                <Button
+                  variant="contained"
+                  onClick={uploadSelectedFiles}
+                  disabled={isUploading || selectedFiles.length === 0}
+                  size="large"
+                  sx={{
+                    background: 'linear-gradient(45deg, #10b981, #059669)',
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #059669, #047857)',
+                      boxShadow: '0 8px 25px rgba(16, 185, 129, 0.3)',
+                    },
+                    px: 6,
+                    py: 1.5,
+                    fontSize: '1.1rem'
+                  }}
+                >
+                  {isUploading ? (
+                    <>⏳ Uploading {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''}...</>
+                  ) : (
+                    <>🚀 Upload {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''}</>
+                  )}
+                </Button>
+              </Box>
+            </Box>
           )}
-        </Box>
-      </Paper>
+        </CardContent>
+      </Card>
+
 
       {/* Documents List */}
       <Box>
