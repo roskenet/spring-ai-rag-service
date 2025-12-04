@@ -1,8 +1,13 @@
+import org.springframework.boot.gradle.tasks.run.BootRun
+import com.google.cloud.tools.jib.gradle.JibTask
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.diffplug.spotless' version '7.0.2'
+    id 'com.google.cloud.tools.jib' version '3.4.5'
+    id 'com.ryandens.javaagent-jib' version '0.4.2'
 }
 
 group = 'com.zalando'
@@ -27,6 +32,8 @@ repositories {
 
 ext {
     set('springAiVersion', "1.0.3")
+    set('observabilitySdkVersion', "2.0.0")
+    set('baseImage', "zalando/openjdk21-minimal:1.0.4")
 }
 
 dependencies {
@@ -46,6 +53,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Java agent for observability
+    javaagent "org.zalando.observability:observability-sdk-javaagent:${observabilitySdkVersion}"
 }
 
 dependencyManagement {
@@ -97,5 +107,73 @@ spotless {
         target '*.gradle', '*.md', '.gitignore'
         trimTrailingWhitespace()
         endWithNewline()
+    }
+}
+
+// ============================================================================
+// JIB CONFIGURATION FOR DOCKER
+// ============================================================================
+
+def jibAgentsDirectory = layout.buildDirectory.dir("jib-agents")
+def agentFileName = "observability-sdk-javaagent.jar"
+
+tasks.register('copyJavaAgent', Copy) {
+    from(configurations.javaagent)
+    into(jibAgentsDirectory)
+    rename { _ -> agentFileName }
+}
+
+tasks.withType(JibTask) {
+    dependsOn('copyJavaAgent')
+}
+
+// hack to make sure the java agent is copied when importing the project into the IDE
+gradle.projectsEvaluated {
+    tasks.findByName("prepareKotlinBuildScriptModel")?.finalizedBy("copyJavaAgent")
+    tasks.findByName("clean")?.finalizedBy("cleanCopyJavaAgent")
+}
+
+tasks.bootJar {
+    archiveBaseName.set("zeos-rag-backend")
+    archiveVersion.set("1.0.0")
+    destinationDirectory.set(layout.buildDirectory.dir("libs"))
+}
+
+tasks.named('bootRun', BootRun) {
+    mainClass.set("com.zalando.rag.ZeosRagApplication")
+}
+
+jib {
+    from {
+        image = ext.baseImage
+        platforms {
+            platform {
+                os = "linux"
+                architecture = "amd64"
+            }
+        }
+    }
+    extraDirectories {
+        paths {
+            path {
+                setFrom(file(jibAgentsDirectory))
+            }
+        }
+    }
+    container {
+        jvmFlags = [
+            "-javaagent:/${agentFileName}",
+            "-XX:MaxRAMPercentage=75",
+            "-XX:InitialRAMPercentage=75",
+            "-Xlog:gc",
+            "-XX:+ExitOnOutOfMemoryError",
+            "-XX:+HeapDumpOnOutOfMemoryError"
+        ]
+        ports = ["8080"]
+        creationTime = "USE_CURRENT_TIMESTAMP"
+        user = "1001"
+    }
+    to {
+        // Image will be set by CDP pipeline via -Djib.to.image
     }
 }
