@@ -32,8 +32,8 @@ repositories {
 
 ext {
     set('springAiVersion', "1.0.3")
-    set('observabilitySdkVersion', "2.0.0")
-    set('baseImage', "zalando/openjdk21-minimal:1.0.4")
+    set('observabilitySdkVersion', "3.1.13")
+    set('baseImage', "container-registry.zalando.net/library/eclipse-temurin-21-jdk:latest")
 }
 
 dependencies {
@@ -145,7 +145,7 @@ tasks.named('bootRun', BootRun) {
 
 jib {
     from {
-        image = ext.baseImage
+        image = baseImage
         platforms {
             platform {
                 os = "linux"
