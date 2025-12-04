@@ -1,12 +1,116 @@
-# comments are allowed in yaml files
 version: "2017-09-20"
+
+SERVICE_NAME: &SERVICE_NAME 'zeos-rag-service'
+
+shared_vars: &SHARED_ENV
+  APPLICATION_ID: *SERVICE_NAME
+  COMPONENT_ID: *SERVICE_NAME
+  TEAM_ID: "pacman"
+  NAMESPACE: "inbound"
+  BACKEND_IMAGE: &BACKEND_IMAGE "zeos/zeos-rag-backend:#{CDP_BUILD_VERSION}"
+  FRONTEND_IMAGE: &FRONTEND_IMAGE "zeos/zeos-rag-frontend:#{CDP_BUILD_VERSION}"
+  STACK_VERSION: "#{CDP_BUILD_VERSION}"
+  SCALED_DOWN_STACKS_TO_KEEP: "1"
+  MIN_REPLICAS: "1"
+  MAX_REPLICAS: "1"
+  DB_CPU_REQUEST: 100m
+  DB_CPU_LIMIT: 500m
+  DB_MEMORY_REQUEST: 512Mi
+  DB_MEMORY_LIMIT: 2Gi
+  DB_SIZE: "10Gi"
+  DB_NAME: "spring_ai_rag_dev"
+  DATABASE_ID: "zeos-rag"
+
+stg_vars: &STG_ENV
+  CLUSTER_ID: "zfs-test"
+  ENVIRONMENT: "staging"
+  SCALED_DOWN_STACKS_TTL: "600"
+  MIN_REPLICAS: "1"
+  REPLICAS: "1"
+  BACKEND_CPU_REQUEST: "300m"
+  BACKEND_MEMORY_REQUEST: "1.5Gi"
+  FRONTEND_CPU_REQUEST: "150m"
+  FRONTEND_MEMORY_REQUEST: "768Mi"
+  SPRING_PROFILE: "staging"
+  JANITOR_TTL: "forever"
+
+
+allow_concurrent_steps: true
+allow_concurrent_pipelines: true
+
 pipeline:
   - id: build
+    depends_on: []
     type: script
+    vm_config:
+      type: linux
+      image: cdp-runtime/jdk21
+    env:
+      <<: *SHARED_ENV
+      CODACY_API_BASE_URL: "https://codacy.bus.zalan.do"
     commands:
-      - desc: "Echo 'Hello Zalando'"
+      - desc: "Run backend tests"
         cmd: |
-          echo "Hello Zalando"
-      - desc: "Echo 'Hello CDP'"
+          cd backend
+          ./gradlew test
+          ./gradlew build
+      - desc: "Build and push backend Docker image"
         cmd: |
-          echo "Hello CDP"
+          cd backend
+          FULL_BACKEND_IMAGE=${CDP_REGISTRY}/${TEAM_ID}/zeos-rag-backend:#{CDP_BUILD_VERSION}
+          echo "Build backend docker image: ${FULL_BACKEND_IMAGE}"
+          ./gradlew jib -Djib.to.image=${FULL_BACKEND_IMAGE}
+          cdp-promote-image ${FULL_BACKEND_IMAGE}
+      - desc: "Build and push frontend Docker image"
+        cmd: |
+          cd frontend
+          FULL_FRONTEND_IMAGE=${CDP_REGISTRY}/${TEAM_ID}/zeos-rag-frontend:#{CDP_BUILD_VERSION}
+          echo "Build frontend docker image: ${FULL_FRONTEND_IMAGE}"
+          docker build -t ${FULL_FRONTEND_IMAGE} .
+          docker push ${FULL_FRONTEND_IMAGE}
+          cdp-promote-image ${FULL_FRONTEND_IMAGE}
+ 
+
+  - id: deploy-stg
+    desc: 'Deploy Staging'
+    depends_on:
+      - build
+    when:
+      branch: main
+      event: push
+    type: deploy
+    target: "zfs-test"
+    sources:
+      - dir: deploy/apply
+        default_namespace: "inbound"
+        template_vars:
+          <<: [ *STG_ENV, *SHARED_ENV ]
+          COMPONENT_VERSION: "staging"
+
+  - id: traffic-stg-backend
+    type: traffic
+    when:
+      branch: main
+      event: push
+    depends_on:
+      - deploy-stg
+    target: "zfs-test"
+    namespace: "inbound"
+    stackset: "zeos-rag-backend-staging"
+    stack_version: "#{CDP_BUILD_VERSION}"
+    target_percentage: 100
+    requires_human_approval: false
+
+  - id: traffic-stg-frontend
+    type: traffic
+    when:
+      branch: main
+      event: push
+    depends_on:
+      - deploy-stg
+    target: "zfs-test"
+    namespace: "inbound"
+    stackset: "zeos-rag-frontend-staging"
+    stack_version: "#{CDP_BUILD_VERSION}"
+    target_percentage: 100
+    requires_human_approval: false

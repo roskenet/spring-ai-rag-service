@@ -1,0 +1,56 @@
+kind: "postgresql"
+apiVersion: "acid.zalan.do/v1"
+
+metadata:
+  name: "{{{DATABASE_ID}}}-{{{ENVIRONMENT}}}-db"
+  namespace: "{{{NAMESPACE}}}"
+  labels:
+    application: "{{{APPLICATION_ID}}}"
+    environment: "{{{ENVIRONMENT}}}"
+    team: "{{{TEAM_ID}}}"
+  annotations:
+    zalando.org/owning-application: "{{{APPLICATION_ID}}}"
+    zalando.org/criticality: "3"
+
+spec:
+  teamId: "{{{TEAM_ID}}}"
+  volume:
+    size: "{{{DB_SIZE}}}"
+  numberOfInstances: 1
+
+  maintenanceWindows:
+    - Sat:03:00-06:00
+    - Sun:03:00-06:00
+
+  postgresql:
+    version: "16"
+    parameters:
+      # Required for pgvector extension
+      shared_preload_libraries: "vector"
+      # Optimize for vector operations
+      work_mem: "256MB"
+      maintenance_work_mem: "512MB"
+      effective_cache_size: "1GB"
+      # Enable logging for performance tuning
+      log_min_duration_statement: "1000"
+
+  # Enable vector extension
+  enableShmVolume: true
+
+  init:
+    - "CREATE EXTENSION IF NOT EXISTS vector;"
+
+  users:
+    postgres: []
+    zeos_rag_user: []
+
+  databases:
+    "{{{DB_NAME}}}": zeos_rag_user
+
+  resources:
+    requests:
+      cpu: "{{{DB_CPU_REQUEST}}}"
+      memory: "{{{DB_MEMORY_REQUEST}}}"
+    limits:
+      cpu: "{{{DB_CPU_LIMIT}}}"
+      memory: "{{{DB_MEMORY_LIMIT}}}"
