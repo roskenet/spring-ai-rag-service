@@ -1,5 +1,5 @@
-# Use Node.js 20 Alpine as base image (required for Next.js)
-FROM node:20-alpine AS builder
+# Use Node.js 21 Alpine as base image (required for Next.js 16 + React 19)
+FROM node:21-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Runtime stage
-FROM node:20-alpine AS runner
+FROM node:21-alpine AS runner
 
 # Set working directory
 WORKDIR /app
