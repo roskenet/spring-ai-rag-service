@@ -1,0 +1,12 @@
+# comments are allowed in yaml files
+version: "2017-09-20"
+pipeline:
+  - id: build
+    type: script
+    commands:
+      - desc: "Echo 'Hello Zalando'"
+        cmd: |
+          echo "Hello Zalando"
+      - desc: "Echo 'Hello CDP'"
+        cmd: |
+          echo "Hello CDP"
