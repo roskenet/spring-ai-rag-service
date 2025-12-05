@@ -28,6 +28,14 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven {
+        name = "zalando-releases"
+        url = "https://maven.zalando.net/content/repositories/releases/"
+    }
+    maven {
+        name = "zalando-snapshots"
+        url = "https://maven.zalando.net/content/repositories/snapshots/"
+    }
 }
 
 ext {
