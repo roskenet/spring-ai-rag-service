@@ -1,5 +1,6 @@
 import org.springframework.boot.gradle.tasks.run.BootRun
 import com.google.cloud.tools.jib.gradle.JibTask
+import nu.studer.gradle.credentials.domain.CredentialsContainer
 
 plugins {
     id 'java'
@@ -8,11 +9,18 @@ plugins {
     id 'com.diffplug.spotless' version '7.0.2'
     id 'com.google.cloud.tools.jib' version '3.4.5'
     id 'com.ryandens.javaagent-jib' version '0.4.2'
+    id 'nu.studer.credentials' version '3.0'
 }
 
 group = 'com.zalando'
 version = '0.0.1-SNAPSHOT'
 description = 'Spring AI RAG Learning Platform'
+
+// CDP environment detection and credentials
+def credentials = project.extensions.findByType(CredentialsContainer)
+def mavenUser = project.findProperty("zalandoUsername") as String
+def mavenPassword = credentials?.forKey("zalandoPassword")
+def runningLocally = System.getenv("CDP_BUILD_VERSION") == null
 
 java {
     toolchain {
@@ -27,15 +35,28 @@ configurations {
 }
 
 repositories {
-    mavenCentral()
+    mavenLocal()
     maven {
         name = "zalando-releases"
-        url = "https://maven.zalando.net/content/repositories/releases/"
+        url = "https://maven.zalando.net/repository/releases"
+        if (runningLocally && mavenUser && mavenPassword) {
+            credentials {
+                username = mavenUser
+                password = mavenPassword
+            }
+        }
     }
     maven {
         name = "zalando-snapshots"
         url = "https://maven.zalando.net/content/repositories/snapshots/"
+        if (runningLocally && mavenUser && mavenPassword) {
+            credentials {
+                username = mavenUser
+                password = mavenPassword
+            }
+        }
     }
+    mavenCentral()
 }
 
 ext {
