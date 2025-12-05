@@ -16,10 +16,13 @@ group = 'com.zalando'
 version = '0.0.1-SNAPSHOT'
 description = 'Spring AI RAG Learning Platform'
 
+// Apply credentials plugin explicitly (required for CDP)
+apply plugin: 'nu.studer.credentials'
+
 // CDP environment detection and credentials
-def credentials = project.extensions.findByType(CredentialsContainer)
+def credentials = project.extensions.getByType(CredentialsContainer)
 def mavenUser = project.findProperty("zalandoUsername") as String
-def mavenPassword = credentials?.forKey("zalandoPassword")
+def mavenPassword = credentials.forKey("zalandoPassword")
 def runningLocally = System.getenv("CDP_BUILD_VERSION") == null
 
 java {
