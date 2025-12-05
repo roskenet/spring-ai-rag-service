@@ -19,11 +19,12 @@ description = 'Spring AI RAG Learning Platform'
 // Apply credentials plugin explicitly (required for CDP)
 apply plugin: 'nu.studer.credentials'
 
-// CDP environment detection and credentials
-def credentials = project.extensions.getByType(CredentialsContainer)
-def mavenUser = project.findProperty("zalandoUsername") as String
-def mavenPassword = credentials.forKey("zalandoPassword")
+// CDP environment detection
 def runningLocally = System.getenv("CDP_BUILD_VERSION") == null
+
+// Simple credential access - let the credentials plugin handle it automatically
+def mavenUser = project.findProperty("zalandoUsername") as String
+def mavenPassword = runningLocally ? project.findProperty("zalandoPassword") as String : null
 
 java {
     toolchain {
