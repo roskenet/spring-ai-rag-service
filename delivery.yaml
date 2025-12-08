@@ -58,7 +58,7 @@ pipeline:
         cmd: |
           cd backend
 
-          FULL_BACKEND_IMAGE=${CDP_REGISTRY}/${TEAM_ID}/${COMPONENT_ID}:#{CDP_BUILD_VERSION}
+          FULL_BACKEND_IMAGE=${CDP_REGISTRY}/${TEAM_ID}/zeos-rag-backend:#{CDP_BUILD_VERSION}
           echo "Build backend docker image: ${FULL_BACKEND_IMAGE}"
           ./gradlew jib -Djib.to.image=${FULL_BACKEND_IMAGE}
           cdp-promote-image ${FULL_BACKEND_IMAGE}
