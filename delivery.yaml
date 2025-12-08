@@ -102,16 +102,16 @@ pipeline:
     target_percentage: 100
     requires_human_approval: false
 
-  - id: traffic-stg-frontend
-    type: traffic
-    when:
-      branch: main
-      event: push
-    depends_on:
-      - deploy-stg
-    target: "zfs-test"
-    namespace: "inbound"
-    stackset: "zeos-rag-frontend-staging"
-    stack_version: "#{CDP_BUILD_VERSION}"
-    target_percentage: 100
-    requires_human_approval: false
+#  - id: traffic-stg-frontend
+#    type: traffic
+#    when:
+#      branch: main
+#      event: push
+#    depends_on:
+#      - deploy-stg
+#    target: "zfs-test"
+#    namespace: "inbound"
+#    stackset: "zeos-rag-frontend-staging"
+#    stack_version: "#{CDP_BUILD_VERSION}"
+#    target_percentage: 100
+#    requires_human_approval: false
