@@ -7,7 +7,7 @@ shared_vars: &SHARED_ENV
   COMPONENT_ID: *SERVICE_NAME
   TEAM_ID: "pacman"
   NAMESPACE: "inbound"
-  BACKEND_IMAGE: &BACKEND_IMAGE "pacman/zeos-rag-service:#{CDP_BUILD_VERSION}"
+  BACKEND_IMAGE: &BACKEND_IMAGE "pacman/zeos-rag-backend:#{CDP_BUILD_VERSION}"
   FRONTEND_IMAGE: &FRONTEND_IMAGE "pacman/zeos-rag-frontend:#{CDP_BUILD_VERSION}"
   STACK_VERSION: "#{CDP_BUILD_VERSION}"
   SCALED_DOWN_STACKS_TO_KEEP: "1"
@@ -58,14 +58,14 @@ pipeline:
         cmd: |
           cd backend
 
-          FULL_BACKEND_IMAGE=${CDP_REGISTRY}/${BACKEND_IMAGE}
+          FULL_BACKEND_IMAGE=pierone.stups.zalan.do/${BACKEND_IMAGE}
           echo "Build backend docker image: ${FULL_BACKEND_IMAGE}"
           ./gradlew jib -Djib.to.image=${FULL_BACKEND_IMAGE}
           cdp-promote-image ${FULL_BACKEND_IMAGE}
       - desc: "Build and push frontend Docker image"
         cmd: |
           cd frontend
-          FULL_FRONTEND_IMAGE=${CDP_REGISTRY}/${FRONTEND_IMAGE}
+          FULL_FRONTEND_IMAGE=pierone.stups.zalan.do/${FRONTEND_IMAGE}
           echo "Build frontend docker image: ${FULL_FRONTEND_IMAGE}"
           docker build -t ${FULL_FRONTEND_IMAGE} .
           docker push ${FULL_FRONTEND_IMAGE}
