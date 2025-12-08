@@ -34,7 +34,7 @@ RUN apk add --no-cache curl
 RUN addgroup -S appuser && adduser -S appuser -G appuser
 
 # Copy the built JAR from builder stage
-COPY --from=builder /app/build/libs/*.jar app.jar
+COPY --from=builder /app/build/libs/zeos-rag-backend-1.0.0.jar app.jar
 
 # Change ownership to appuser
 RUN chown appuser:appuser app.jar
