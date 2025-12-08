@@ -1,5 +1,4 @@
-# Use Eclipse Temurin OpenJDK 21 as the base image
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM container-registry.zalando.net/library/eclipse-temurin-21-jdk:latest AS builder
 
 # Set working directory
 WORKDIR /app
@@ -22,7 +21,7 @@ COPY src ./src
 RUN ./gradlew build -x test --no-daemon
 
 # Runtime stage
-FROM eclipse-temurin:21-jre-alpine
+FROM container-registry.zalando.net/library/eclipse-temurin-21-jdk:latest
 
 # Set working directory
 WORKDIR /app
