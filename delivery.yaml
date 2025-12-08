@@ -62,14 +62,14 @@ pipeline:
           docker build -t ${FULL_BACKEND_IMAGE} .
           docker push ${FULL_BACKEND_IMAGE}
           cdp-promote-image ${FULL_BACKEND_IMAGE}
-      - desc: "Build and push frontend Docker image"
-        cmd: |
-          cd frontend
-          FULL_FRONTEND_IMAGE=$CDP_REGISTRY/${FRONTEND_IMAGE}
-          echo "Build frontend docker image: ${FULL_FRONTEND_IMAGE}"
-          docker build -t ${FULL_FRONTEND_IMAGE} .
-          docker push ${FULL_FRONTEND_IMAGE}
-          cdp-promote-image ${FULL_FRONTEND_IMAGE}
+#      - desc: "Build and push frontend Docker image"
+#        cmd: |
+#          cd frontend
+#          FULL_FRONTEND_IMAGE=$CDP_REGISTRY/${FRONTEND_IMAGE}
+#          echo "Build frontend docker image: ${FULL_FRONTEND_IMAGE}"
+#          docker build -t ${FULL_FRONTEND_IMAGE} .
+#          docker push ${FULL_FRONTEND_IMAGE}
+#          cdp-promote-image ${FULL_FRONTEND_IMAGE}
  
 
   - id: deploy-stg
