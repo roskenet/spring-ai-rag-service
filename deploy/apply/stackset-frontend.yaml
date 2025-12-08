@@ -34,7 +34,7 @@ spec:
         spec:
           containers:
             - name: "zeos-rag-frontend-{{{ENVIRONMENT}}}"
-              image: "{{{CDP_REGISTRY}}}/pacman/zeos-rag-frontend:{{{CDP_BUILD_VERSION}}}"
+              image: "{{{CDP_REGISTRY}}}/{{{FRONTEND_IMAGE}}}"
               env:
                 - name: NODE_ENV
                   value: "production"
