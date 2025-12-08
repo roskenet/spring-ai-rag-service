@@ -206,7 +206,4 @@ jib {
         creationTime = "USE_CURRENT_TIMESTAMP"
         user = "1001"
     }
-    to {
-        // Image will be set by CDP pipeline via -Djib.to.image
-    }
 }
