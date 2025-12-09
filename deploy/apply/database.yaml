@@ -28,7 +28,7 @@ spec:
       # Required for pgvector and pg_cron extensions
       shared_preload_libraries: "vector,pg_cron"
       # Configure pg_cron
-      cron.database_name: "{{{DB_NAME}}}"
+      cron.database_name: "postgres"
       # Optimize for vector operations
       work_mem: "256MB"
       maintenance_work_mem: "512MB"
