@@ -4,7 +4,7 @@ FROM container-registry.zalando.net/library/eclipse-temurin-21-jdk:latest AS bui
 WORKDIR /app
 
 # Install curl for health checks
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Copy gradle wrapper and build files
 COPY gradlew ./
@@ -27,10 +27,10 @@ FROM container-registry.zalando.net/library/eclipse-temurin-21-jdk:latest
 WORKDIR /app
 
 # Install curl for health checks
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user (Alpine Linux syntax)
-RUN addgroup -S appuser && adduser -S appuser -G appuser
+# Create a non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 # Copy the built JAR from builder stage
 COPY --from=builder /app/build/libs/zeos-rag-backend-1.0.0.jar app.jar
