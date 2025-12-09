@@ -1,7 +1,7 @@
 apiVersion: zalando.org/v1
 kind: StackSet
 metadata:
-  name: "zeos-rag-backend-{{{COMPONENT_VERSION}}}"
+  name: "zeos-rag-backend-{{{ENVIRONMENT}}}"
   labels:
     application: "{{{APPLICATION_ID}}}"
     component: "zeos-rag-backend"
