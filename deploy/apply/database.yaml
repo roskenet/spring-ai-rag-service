@@ -26,7 +26,7 @@ spec:
     version: "16"
     parameters:
       # Required for pgvector extension
-      shared_preload_libraries: "vector"
+     # shared_preload_libraries: "vector"
       # Optimize for vector operations
       work_mem: "256MB"
       maintenance_work_mem: "512MB"
@@ -34,11 +34,6 @@ spec:
       # Enable logging for performance tuning
       log_min_duration_statement: "1000"
 
-  # Enable vector extension
-  enableShmVolume: true
-
-  init:
-    - "CREATE EXTENSION IF NOT EXISTS vector;"
 
   users:
     postgres: []

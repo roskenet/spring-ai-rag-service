@@ -61,7 +61,7 @@ pipeline:
           FULL_BACKEND_IMAGE=$CDP_REGISTRY/${BACKEND_IMAGE}
           docker build -t ${FULL_BACKEND_IMAGE} .
           docker push ${FULL_BACKEND_IMAGE}
-          cdp-promote-image ${FULL_BACKEND_IMAGE}
+      #    cdp-promote-image ${FULL_BACKEND_IMAGE}
 #      - desc: "Build and push frontend Docker image"
 #        cmd: |
 #          cd frontend
@@ -70,14 +70,14 @@ pipeline:
 #          docker build -t ${FULL_FRONTEND_IMAGE} .
 #          docker push ${FULL_FRONTEND_IMAGE}
 #          cdp-promote-image ${FULL_FRONTEND_IMAGE}
- 
 
-  - id: deploy-stg
-    desc: 'Deploy Staging'
+
+  - id: deploy-staging
+    desc: 'Deploy staging'
     depends_on:
       - build
     when:
-      branch: main
+      branch: deploy
       event: push
     type: deploy
     target: "zfs-test"
@@ -86,21 +86,20 @@ pipeline:
         default_namespace: "inbound"
         template_vars:
           <<: [ *STG_ENV, *SHARED_ENV ]
-          COMPONENT_VERSION: "staging"
 
-  - id: traffic-stg-backend
-    type: traffic
-    when:
-      branch: main
-      event: push
-    depends_on:
-      - deploy-stg
-    target: "zfs-test"
-    namespace: "inbound"
-    stackset: "zeos-rag-backend-staging"
-    stack_version: "#{CDP_BUILD_VERSION}"
-    target_percentage: 100
-    requires_human_approval: false
+#  - id: traffic-stg-backend
+#    type: traffic
+#    when:
+#      branch: deploy
+#      event: push
+#    depends_on:
+#      - deploy-stg
+#    target: "zfs-test"
+#    namespace: "inbound"
+#    stackset: "zeos-rag-backend-staging"
+#    stack_version: "#{CDP_BUILD_VERSION}"
+#    target_percentage: 100
+#    requires_human_approval: false
 
 #  - id: traffic-stg-frontend
 #    type: traffic

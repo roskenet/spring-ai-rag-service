@@ -12,7 +12,7 @@ spec:
   # For Stacksets, Fabric Gateway will work with an external operator
   x-external-service-provider:
     hosts:
-      - zeos-rag-backend-{{{COMPONENT_VERSION}}}.{{{CLUSTER_ID}}}.zalan.do
+      - zeos-rag-backend-{{{ENVIRONMENT}}}.{{{CLUSTER_ID}}}.zalan.do
     stackSetName: zeos-rag-backend-{{{ENVIRONMENT}}}
     stackVersion: {{{STACK_VERSION}}}
 
@@ -62,6 +62,4 @@ spec:
 
     # Health check (no auth required)
     /actuator/health:
-      get:
-        x-fabric-whitelist:
-          - "*"
+      get: {}

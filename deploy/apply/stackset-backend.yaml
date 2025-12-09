@@ -1,7 +1,7 @@
 apiVersion: zalando.org/v1
 kind: StackSet
 metadata:
-  name: "zeos-rag-backend-{{{COMPONENT_VERSION}}}"
+  name: "zeos-rag-backend-{{{ENVIRONMENT}}}"
   labels:
     application: "{{{APPLICATION_ID}}}"
     component: "zeos-rag-backend"
@@ -56,11 +56,6 @@ spec:
                     secretKeyRef:
                       name: "postgres.{{{DATABASE_ID}}}-{{{ENVIRONMENT}}}-db.credentials"
                       key: password
-                - name: ZTOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: "zeos-rag-secrets"
-                      key: ztoken
               resources:
                 requests:
                   cpu: "{{{BACKEND_CPU_REQUEST}}}"
