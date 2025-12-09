@@ -78,7 +78,7 @@ pipeline:
       - build
     when:
       branch: deploy
-      event: pull_request
+      event: push
     type: deploy
     target: "zfs-test"
     sources:
@@ -86,7 +86,6 @@ pipeline:
         default_namespace: "inbound"
         template_vars:
           <<: [ *STG_ENV, *SHARED_ENV ]
-          COMPONENT_VERSION: "staging"
 
 #  - id: traffic-stg-backend
 #    type: traffic
