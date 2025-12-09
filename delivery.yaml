@@ -40,7 +40,7 @@ allow_concurrent_pipelines: true
 
 pipeline:
   - id: build
-    depends_on: [ ]
+    depends_on: []
     type: script
     vm_config:
       type: linux
