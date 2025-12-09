@@ -40,7 +40,7 @@ allow_concurrent_pipelines: true
 
 pipeline:
   - id: build
-    depends_on: []
+    depends_on: [ ]
     type: script
     vm_config:
       type: linux
@@ -61,15 +61,15 @@ pipeline:
           FULL_BACKEND_IMAGE=$CDP_REGISTRY/${BACKEND_IMAGE}
           docker build -t ${FULL_BACKEND_IMAGE} .
           docker push ${FULL_BACKEND_IMAGE}
-      #    cdp-promote-image ${FULL_BACKEND_IMAGE} // ENABLE FOR PROD DEPLOY
-#      - desc: "Build and push frontend Docker image"
-#        cmd: |
-#          cd frontend
-#          FULL_FRONTEND_IMAGE=$CDP_REGISTRY/${FRONTEND_IMAGE}
-#          echo "Build frontend docker image: ${FULL_FRONTEND_IMAGE}"
-#          docker build -t ${FULL_FRONTEND_IMAGE} .
-#          docker push ${FULL_FRONTEND_IMAGE}
-#          cdp-promote-image ${FULL_FRONTEND_IMAGE}
+          cdp-promote-image ${FULL_BACKEND_IMAGE}
+  #      - desc: "Build and push frontend Docker image"
+  #        cmd: |
+  #          cd frontend
+  #          FULL_FRONTEND_IMAGE=$CDP_REGISTRY/${FRONTEND_IMAGE}
+  #          echo "Build frontend docker image: ${FULL_FRONTEND_IMAGE}"
+  #          docker build -t ${FULL_FRONTEND_IMAGE} .
+  #          docker push ${FULL_FRONTEND_IMAGE}
+  #          cdp-promote-image ${FULL_FRONTEND_IMAGE}
 
 
   - id: deploy-staging
@@ -87,19 +87,19 @@ pipeline:
         template_vars:
           <<: [ *STG_ENV, *SHARED_ENV ]
 
-#  - id: traffic-stg-backend
-#    type: traffic
-#    when:
-#      branch: deploy
-#      event: push
-#    depends_on:
-#      - deploy-stg
-#    target: "zfs-test"
-#    namespace: "inbound"
-#    stackset: "zeos-rag-backend-staging"
-#    stack_version: "#{CDP_BUILD_VERSION}"
-#    target_percentage: 100
-#    requires_human_approval: false
+  - id: traffic-stg-backend
+    type: traffic
+    when:
+      branch: deploy
+      event: push
+    depends_on:
+      - deploy-stg
+    target: "zfs-test"
+    namespace: "inbound"
+    stackset: "zeos-rag-backend-staging"
+    stack_version: "#{CDP_BUILD_VERSION}"
+    target_percentage: 100
+    requires_human_approval: false
 
 #  - id: traffic-stg-frontend
 #    type: traffic
