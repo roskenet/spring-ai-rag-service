@@ -61,7 +61,7 @@ pipeline:
           FULL_BACKEND_IMAGE=$CDP_REGISTRY/${BACKEND_IMAGE}
           docker build -t ${FULL_BACKEND_IMAGE} .
           docker push ${FULL_BACKEND_IMAGE}
-      #    cdp-promote-image ${FULL_BACKEND_IMAGE}
+      #    cdp-promote-image ${FULL_BACKEND_IMAGE} // ENABLE FOR PROD DEPLOY
 #      - desc: "Build and push frontend Docker image"
 #        cmd: |
 #          cd frontend
@@ -77,7 +77,7 @@ pipeline:
     depends_on:
       - build
     when:
-      branch: deploy
+      branch: main
       event: push
     type: deploy
     target: "zfs-test"
