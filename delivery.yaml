@@ -21,21 +21,6 @@ shared_vars: &SHARED_ENV
   DB_NAME: "spring_ai_rag_dev"
   DATABASE_ID: "zeos-rag"
 
-
-
-pr_vars: &PR_ENV
-  CLUSTER_ID: "zfs-test"
-  ENVIRONMENT: "pr"
-  SCALED_DOWN_STACKS_TTL: "600"
-  MIN_REPLICAS: "1"
-  REPLICAS: "1"
-  BACKEND_CPU_REQUEST: "300m"
-  BACKEND_MEMORY_REQUEST: "1.5Gi"
-  FRONTEND_CPU_REQUEST: "150m"
-  FRONTEND_MEMORY_REQUEST: "768Mi"
-  SPRING_PROFILE: "pr"
-  JANITOR_TTL: "forever"
-
 stg_vars: &STG_ENV
   CLUSTER_ID: "zfs-test"
   ENVIRONMENT: "staging"
@@ -85,10 +70,10 @@ pipeline:
 #          docker build -t ${FULL_FRONTEND_IMAGE} .
 #          docker push ${FULL_FRONTEND_IMAGE}
 #          cdp-promote-image ${FULL_FRONTEND_IMAGE}
- 
 
-  - id: deploy-pr
-    desc: 'Deploy pr'
+
+  - id: deploy-staging
+    desc: 'Deploy staging'
     depends_on:
       - build
     when:
@@ -100,8 +85,8 @@ pipeline:
       - dir: deploy/apply
         default_namespace: "inbound"
         template_vars:
-          <<: [ *PR_ENV, *SHARED_ENV ]
-          COMPONENT_VERSION: "pr"
+          <<: [ *STG_ENV, *SHARED_ENV ]
+          COMPONENT_VERSION: "staging"
 
 #  - id: traffic-stg-backend
 #    type: traffic
