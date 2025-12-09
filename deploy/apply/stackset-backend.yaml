@@ -56,11 +56,6 @@ spec:
                     secretKeyRef:
                       name: "postgres.{{{DATABASE_ID}}}-{{{ENVIRONMENT}}}-db.credentials"
                       key: password
-                - name: ZTOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: "zeos-rag-secrets"
-                      key: ztoken
               resources:
                 requests:
                   cpu: "{{{BACKEND_CPU_REQUEST}}}"
