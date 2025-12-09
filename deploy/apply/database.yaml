@@ -25,10 +25,8 @@ spec:
   postgresql:
     version: "16"
     parameters:
-      # Required for pgvector and pg_cron extensions
-      shared_preload_libraries: "vector,pg_cron"
-      # Configure pg_cron
-      cron.database_name: "postgres"
+      # Required for pgvector extension
+      shared_preload_libraries: "vector"
       # Optimize for vector operations
       work_mem: "256MB"
       maintenance_work_mem: "512MB"
