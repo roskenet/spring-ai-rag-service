@@ -90,10 +90,10 @@ pipeline:
   - id: traffic-stg-backend
     type: traffic
     when:
-      branch: deploy
+      branch: main
       event: push
     depends_on:
-      - deploy-stg
+      - deploy-staging
     target: "zfs-test"
     namespace: "inbound"
     stackset: "zeos-rag-backend-staging"
