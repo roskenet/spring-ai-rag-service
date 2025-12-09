@@ -72,13 +72,13 @@ pipeline:
 #          cdp-promote-image ${FULL_FRONTEND_IMAGE}
  
 
-  - id: deploy-stg
-    desc: 'Deploy Staging'
+  - id: deploy-pr
+    desc: 'Deploy pr'
     depends_on:
       - build
     when:
       branch: deploy
-      event: push
+      event: pull_request
     type: deploy
     target: "zfs-test"
     sources:
@@ -86,21 +86,21 @@ pipeline:
         default_namespace: "inbound"
         template_vars:
           <<: [ *STG_ENV, *SHARED_ENV ]
-          COMPONENT_VERSION: "staging"
+          COMPONENT_VERSION: "pr"
 
-  - id: traffic-stg-backend
-    type: traffic
-    when:
-      branch: deploy
-      event: push
-    depends_on:
-      - deploy-stg
-    target: "zfs-test"
-    namespace: "inbound"
-    stackset: "zeos-rag-backend-staging"
-    stack_version: "#{CDP_BUILD_VERSION}"
-    target_percentage: 100
-    requires_human_approval: false
+#  - id: traffic-stg-backend
+#    type: traffic
+#    when:
+#      branch: deploy
+#      event: push
+#    depends_on:
+#      - deploy-stg
+#    target: "zfs-test"
+#    namespace: "inbound"
+#    stackset: "zeos-rag-backend-staging"
+#    stack_version: "#{CDP_BUILD_VERSION}"
+#    target_percentage: 100
+#    requires_human_approval: false
 
 #  - id: traffic-stg-frontend
 #    type: traffic
