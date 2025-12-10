@@ -43,8 +43,17 @@ logging:
     org.springframework.jdbc.core: TRACE
     org.springframework.ai: DEBUG
     org.springframework.ai.openai: DEBUG
+    org.springframework.ai.openai.api: DEBUG
+    org.springframework.ai.openai.api.OpenAiApi: TRACE
+    org.springframework.ai.openai.OpenAiEmbeddingModel: TRACE
+    org.springframework.ai.vectorstore.pgvector.PgVectorStore: DEBUG
+    org.springframework.web.client: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG
+    org.springframework.web.client.RestClient: DEBUG
+    org.apache.http: DEBUG
+    org.apache.http.wire: TRACE
     com.zalando.rag: DEBUG
+    com.zalando.rag.service.VectorStoreService: TRACE
     root: WARN
 
 # Application specific configuration
