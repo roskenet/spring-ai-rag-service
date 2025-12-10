@@ -25,8 +25,9 @@ public class ZeosRagApplication {
   public void onApplicationReady() {
     String[] activeProfiles = environment.getActiveProfiles();
     log.info("=== ZEOS RAG APPLICATION STARTED ===");
-    log.info("Active profiles: {}", activeProfiles.length > 0 ?
-             String.join(", ", activeProfiles) : "default");
+    log.info(
+        "Active profiles: {}",
+        activeProfiles.length > 0 ? String.join(", ", activeProfiles) : "default");
 
     // Log embedding configuration
     String baseUrl = environment.getProperty("spring.ai.openai.base-url");
