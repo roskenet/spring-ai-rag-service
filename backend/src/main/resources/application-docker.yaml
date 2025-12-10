@@ -35,6 +35,9 @@ management:
 
 logging:
   level:
-    com.zalando.rag: INFO
-    org.springframework.ai: INFO
+    com.zalando.rag: DEBUG
+    org.springframework.ai: DEBUG
+    org.springframework.ai.openai: DEBUG
+    org.springframework.web.client: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
     org.springframework.web: INFO
