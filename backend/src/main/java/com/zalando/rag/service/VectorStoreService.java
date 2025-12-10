@@ -24,10 +24,28 @@ public class VectorStoreService {
   public void addDocuments(List<Document> documents) {
     try {
       log.info("Adding {} documents to vector store", documents.size());
+      log.debug("VectorStore instance: {}", vectorStore.getClass().getName());
+
+      // Log first document details for debugging
+      if (!documents.isEmpty()) {
+        Document firstDoc = documents.get(0);
+        log.debug("First document: content length={}, metadata={}",
+                 firstDoc.getContent().length(), firstDoc.getMetadata());
+      }
+
+      // This is where the embedding API call happens
+      log.debug("About to call vectorStore.add() which will trigger embedding API call");
       vectorStore.add(documents);
+
       log.info("Successfully added documents to vector store");
     } catch (Exception e) {
       log.error("Error adding documents to vector store", e);
+
+      // Additional debugging info
+      if (e.getCause() != null) {
+        log.error("Root cause: {}", e.getCause().getMessage());
+      }
+
       throw new RuntimeException("Failed to add documents to vector store", e);
     }
   }
