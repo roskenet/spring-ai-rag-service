@@ -33,12 +33,10 @@ public class ZeosRagApplication {
     String baseUrl = environment.getProperty("spring.ai.openai.base-url");
     String model = environment.getProperty("spring.ai.openai.embedding.options.model");
     String dimensions = environment.getProperty("spring.ai.openai.embedding.options.dimensions");
-    boolean hasToken = environment.getProperty("spring.ai.openai.api-key") != null;
 
     log.info("OpenAI base-url: {}", baseUrl);
     log.info("Embedding model: {}", model);
     log.info("Embedding dimensions: {}", dimensions);
-    log.info("API key present: {}", hasToken);
     log.info("=====================================");
   }
 }
