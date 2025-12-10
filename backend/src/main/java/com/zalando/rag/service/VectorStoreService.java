@@ -29,8 +29,7 @@ public class VectorStoreService {
       // Log first document details for debugging
       if (!documents.isEmpty()) {
         Document firstDoc = documents.get(0);
-        log.debug("First document: content length={}, metadata={}",
-                 firstDoc.getContent().length(), firstDoc.getMetadata());
+        log.debug("First document: id={}, metadata={}", firstDoc.getId(), firstDoc.getMetadata());
       }
 
       // This is where the embedding API call happens
