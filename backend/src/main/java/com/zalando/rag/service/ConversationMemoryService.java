@@ -26,7 +26,7 @@ public class ConversationMemoryService {
       new java.util.concurrent.ConcurrentHashMap<>();
 
   // Configuration constants
-  private static final int MAX_MESSAGES_BEFORE_SUMMARIZATION = 3;
+  private static final int MAX_MESSAGES_BEFORE_SUMMARIZATION = 15;
 
   private static final String SUMMARIZATION_PROMPT =
       """
