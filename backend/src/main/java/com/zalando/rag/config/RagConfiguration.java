@@ -1,9 +1,15 @@
 package com.zalando.rag.config;
 
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RagConfiguration {
-  // Configuration will be handled by Spring AI auto-configuration
-  // based on the properties in application.yaml
+
+  @Bean
+  public ChatMemory chatMemory() {
+    return MessageWindowChatMemory.builder().build();
+  }
 }

@@ -12,6 +12,7 @@ export interface ChatRequest {
   temperature?: number;
   topK?: number;
   sessionId?: string;
+  conversationId?: string; // New field for conversation memory
   includeCitations?: boolean;
 }
 
@@ -238,4 +239,9 @@ export const apiClient = new ApiClient();
 // Utility function to generate session ID
 export function generateSessionId(): string {
   return `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Utility function to generate conversation ID
+export function generateConversationId(): string {
+  return `conv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }

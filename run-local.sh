@@ -78,9 +78,30 @@ validate_aws_credentials() {
     fi
 }
 
+# Function to format code with Spotless
+format_code() {
+    print_status "Formatting backend code with Spotless..."
+
+    if [ -d "backend" ]; then
+        cd backend
+        if ./gradlew spotlessApply; then
+            print_success "Code formatting completed"
+            cd ..
+        else
+            print_warning "Code formatting failed, continuing anyway..."
+            cd ..
+        fi
+    else
+        print_warning "Backend directory not found, skipping code formatting"
+    fi
+}
+
 # Function to build and start services
 start_services() {
     print_status "Building and starting services..."
+
+    # Format code before building
+    format_code
 
     # Build the backend JAR first
     print_status "Building backend JAR..."

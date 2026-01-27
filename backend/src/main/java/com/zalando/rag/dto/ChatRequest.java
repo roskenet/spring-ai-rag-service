@@ -33,6 +33,9 @@ public class ChatRequest {
   // Session tracking for analytics
   private String sessionId;
 
+  // Conversation ID for chat memory (if not provided, will use sessionId)
+  private String conversationId;
+
   // User preferences
   @Builder.Default private boolean includeCitations = true;
 }

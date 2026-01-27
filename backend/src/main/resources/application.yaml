@@ -151,3 +151,13 @@ rag:
 
 server:
   port: 8080
+
+# Chat memory optimization configuration
+chat:
+  memory:
+    optimization:
+      enabled: true
+      max-messages-before-summarization: 20
+      sliding-window-size: 8
+      estimated-tokens-per-message: 50
+      summarization-enabled: true
