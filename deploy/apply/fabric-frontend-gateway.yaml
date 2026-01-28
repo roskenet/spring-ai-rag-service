@@ -20,13 +20,13 @@ spec:
   x-fabric-admins:
     - sargutin
 
-  # Frontend routes - serve all paths for SPA routing
+  # Frontend routes - serve all paths for SPA routing (public access, no privileges required)
   paths:
-    # Health check endpoint
+    # Health check endpoint (public)
     /api/health:
       get: {}
 
-    # Main frontend routes (Next.js handles routing)
+    # Main frontend routes (Next.js handles routing) - public access
     /:
       get: {}
 
@@ -42,13 +42,18 @@ spec:
     /config:
       get: {}
 
-    # Static assets
+    # Static assets (public)
     /_next:
       get: {}
 
+    # Static files
     /favicon.ico:
       get: {}
 
-    # Catch-all for SPA routing
+    # All static assets
+    /static:
+      get: {}
+
+    # Catch-all for SPA routing (public)
     /*:
       get: {}
