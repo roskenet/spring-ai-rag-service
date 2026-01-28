@@ -1,0 +1,54 @@
+apiVersion: zalando.org/v1
+kind: FabricGateway
+metadata:
+  name: "zeos-rag-frontend-{{{ENVIRONMENT}}}-fabric"
+  labels:
+    application: "{{{APPLICATION_ID}}}"
+    component: "zeos-rag-frontend"
+    environment: "{{{ENVIRONMENT}}}"
+  annotations:
+    janitor/ttl: "{{{JANITOR_TTL}}}"
+spec:
+  # For Stacksets, Fabric Gateway will work with an external operator
+  x-external-service-provider:
+    hosts:
+      - zeos-rag-frontend-{{{ENVIRONMENT}}}.{{{CLUSTER_ID}}}.zalan.do
+    stackSetName: zeos-rag-frontend-{{{ENVIRONMENT}}}
+    stackVersion: {{{STACK_VERSION}}}
+
+  # Service administrators
+  x-fabric-admins:
+    - sargutin
+
+  # Frontend routes - serve all paths for SPA routing
+  paths:
+    # Health check endpoint
+    /api/health:
+      get: {}
+
+    # Main frontend routes (Next.js handles routing)
+    /:
+      get: {}
+
+    /chat:
+      get: {}
+
+    /analytics:
+      get: {}
+
+    /knowledge-base:
+      get: {}
+
+    /config:
+      get: {}
+
+    # Static assets
+    /_next:
+      get: {}
+
+    /favicon.ico:
+      get: {}
+
+    # Catch-all for SPA routing
+    /*:
+      get: {}
