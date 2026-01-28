@@ -9,8 +9,12 @@ metadata:
   annotations:
     janitor/ttl: "{{{JANITOR_TTL}}}"
 spec:
-  externalIngress:
+  routegroup:
     backendPort: 3000
+    hosts:
+      - "zeos-rag-frontend-{{{ENVIRONMENT}}}.{{{CLUSTER_ID}}}.zalan.do"
+    routes:
+      - pathSubtree: "/"
   stackLifecycle:
     scaledownTTLSeconds: {{{SCALED_DOWN_STACKS_TTL}}}
     limit: {{SCALED_DOWN_STACKS_TO_KEEP}}
