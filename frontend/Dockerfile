@@ -1,5 +1,5 @@
-# Use Node.js 21 Alpine as base image (required for Next.js 16 + React 19)
-FROM node:21-alpine AS builder
+# Use approved Zalando Node.js 24 Alpine base image (supports Next.js 16 + React 19)
+FROM container-registry.zalando.net/library/node-24-alpine:latest AS builder
 
 # Set working directory
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Runtime stage
-FROM node:21-alpine AS runner
+FROM container-registry.zalando.net/library/node-24-alpine:latest AS runner
 
 # Set working directory
 WORKDIR /app
