@@ -16,9 +16,9 @@ spec:
     routes:
       - pathSubtree: "/api/health"
       - pathSubtree: "/"
-        predicates:
-          - type: "oauth2"
-            name: "zalando-employees"
+        filters:
+          # Authenticate user
+          - oauthGrant()
   stackLifecycle:
     scaledownTTLSeconds: {{{SCALED_DOWN_STACKS_TTL}}}
     limit: {{SCALED_DOWN_STACKS_TO_KEEP}}
