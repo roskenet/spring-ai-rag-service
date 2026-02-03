@@ -1,6 +1,6 @@
 version: "2017-09-20"
 
-SERVICE_NAME: &SERVICE_NAME 'zeos-rag-service'
+SERVICE_NAME: &SERVICE_NAME 'ai-knowledge-assistant'
 
 shared_vars: &SHARED_ENV
   APPLICATION_ID: *SERVICE_NAME
