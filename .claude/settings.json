@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "sunrise-mcp-http": {
-      "type": "http",
-      "url": "https://sunrise-mcp.stups.zalan.do/mcp/"
-    }
-  }
-}

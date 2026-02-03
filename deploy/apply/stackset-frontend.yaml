@@ -14,7 +14,11 @@ spec:
     hosts:
       - "zeos-rag-frontend-{{{ENVIRONMENT}}}.{{{CLUSTER_ID}}}.zalan.do"
     routes:
+      - pathSubtree: "/api/health"
       - pathSubtree: "/"
+        predicates:
+          - type: "oauth2"
+            name: "zalando-employees"
   stackLifecycle:
     scaledownTTLSeconds: {{{SCALED_DOWN_STACKS_TTL}}}
     limit: {{SCALED_DOWN_STACKS_TO_KEEP}}
