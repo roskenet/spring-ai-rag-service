@@ -14,7 +14,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 @Slf4j
 public class DynamicTokenConfiguration {
 
-  @Value("${ZTOKEN}")
+  @Value("${ZTOKEN:test-token}")
   private String defaultToken;
 
   @Bean
