@@ -82,7 +82,13 @@ public class TokenInfoService {
       return accessToken;
     }
 
-    log.debug("Using fallback token (ZTOKEN) for LLM request");
-    return fallbackToken;
+    // Check if fallback token is valid
+    if (fallbackToken != null && !fallbackToken.trim().isEmpty()) {
+      log.debug("Using fallback token (ZTOKEN) for LLM request");
+      return fallbackToken;
+    }
+
+    log.debug("No valid token available - neither X-TokenInfo-Forward nor ZTOKEN");
+    return null;
   }
 }

@@ -1,0 +1,28 @@
+spring:
+  ai:
+    openai:
+      api-key: "test-token"
+      base-url: "http://localhost"
+      chat:
+        options:
+          model: "test-model"
+          max-tokens: 100
+          temperature: 0.0
+      embedding:
+        enabled: false
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+logging:
+  level:
+    com.zalando.rag: DEBUG
+    org.springframework.ai: WARN
+    org.springframework.web.client: WARN
+    root: WARN

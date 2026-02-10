@@ -4,6 +4,7 @@ import com.zalando.rag.service.TokenInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,10 +15,11 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 @Slf4j
 public class DynamicTokenConfiguration {
 
-  @Value("${ZTOKEN:test-token}")
+  @Value("${ZTOKEN:}")
   private String defaultToken;
 
   @Bean
+  @ConditionalOnProperty(name = "spring.ai.openai.api-key")
   public RestClientCustomizer openAiRestClientCustomizer(TokenInfoService tokenInfoService) {
     return restClientBuilder ->
         restClientBuilder.requestInterceptor(
@@ -44,8 +46,10 @@ public class DynamicTokenConfiguration {
       // Get effective token (from X-TokenInfo-Forward or fallback)
       String effectiveToken = tokenInfoService.getEffectiveToken(fallbackToken);
 
-      // Set Authorization header
-      request.getHeaders().set("Authorization", "Bearer " + effectiveToken);
+      // Only set Authorization header if we have a valid token
+      if (effectiveToken != null && !effectiveToken.trim().isEmpty()) {
+        request.getHeaders().set("Authorization", "Bearer " + effectiveToken);
+      }
 
       // Continue with the request
       return execution.execute(request, body);
