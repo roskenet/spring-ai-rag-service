@@ -1,53 +1,53 @@
-# Конфигурация токенов для разных окружений
+# Token Configuration for Different Environments
 
-## 🏠 Локальная разработка (dev)
+## 🏠 Local Development (dev)
 
-**Источник токена:** Переменная окружения `ZTOKEN`
+**Token Source:** Environment variable `ZTOKEN`
 
 ```bash
 export ZTOKEN="your-local-ztoken-here"
 ./gradlew bootRun
 ```
 
-**Логика:**
-- Использует `ZTOKEN` из переменной окружения
-- Если есть `X-TokenInfo-Forward` заголовок - приоритет у него
-- Fallback на `ZTOKEN` если заголовка нет
+**Logic:**
+- Uses `ZTOKEN` from environment variable
+- If `X-TokenInfo-Forward` header is present - it takes priority
+- Fallback to `ZTOKEN` if no header
 
 ---
 
-## 🧪 Тесты (test profile)
+## 🧪 Tests (test profile)
 
-**Источник токена:** Заглушки (mocks)
+**Token Source:** Mocks/stubs
 
 ```bash
 ./gradlew test
 ```
 
-**Логика:**
-- `MockChatModel` и `MockVectorStore` заглушки
-- Реальные API вызовы к LLM не выполняются
-- Spring AI отключен (`enabled: false`)
+**Logic:**
+- `DynamicTokenConfiguration` excluded with `@Profile("!test")`
+- No real API calls to LLM services
+- Standard Spring AI auto-configuration
 - `require-header-token: false`
 
 ---
 
 ## 🚀 Staging/Production
 
-**Источник токена:** ТОЛЬКО заголовок `X-TokenInfo-Forward`
+**Token Source:** ONLY `X-TokenInfo-Forward` header
 
-**Конфигурация:**
+**Configuration:**
 ```yaml
 rag:
   token:
-    require-header-token: true  # ОБЯЗАТЕЛЬНО из заголовка
+    require-header-token: true  # MANDATORY from header
 ```
 
-**Логика:**
-1. ✅ Токен найден в `X-TokenInfo-Forward` → используется
-2. ❌ Токен НЕ найден в заголовке → запрос отклоняется
+**Logic:**
+1. ✅ Token found in `X-TokenInfo-Forward` → used
+2. ❌ Token NOT found in header → request rejected
 
-**Пример запроса:**
+**Example request:**
 ```bash
 curl -X POST https://staging.example.com/api/chat/ask \
   -H "X-TokenInfo-Forward: {\"access_token\":\"staging-user-token\"}" \
@@ -57,22 +57,22 @@ curl -X POST https://staging.example.com/api/chat/ask \
 
 ---
 
-## 🔍 Логирование
+## 🔍 Logging
 
-- `TokenInfoService` логирует источник токена
-- В staging видно откуда взят токен:
+- `TokenInfoService` logs token source
+- In staging you can see where token came from:
   - `"Using access_token from X-TokenInfo-Forward header"`
   - `"X-TokenInfo-Forward header is required but not present"`
 
 ---
 
-## ⚙️ Активация профилей
+## ⚙️ Profile Activation
 
 ```bash
-# Локально
+# Local development
 ./gradlew bootRun
 
-# Тесты
+# Tests
 ./gradlew test
 
 # Staging
