@@ -8,11 +8,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
+@Profile("!test") // Exclude from test profile
 public class DynamicTokenConfiguration {
 
   @Value("${ZTOKEN:}")
@@ -49,6 +51,9 @@ public class DynamicTokenConfiguration {
       // Only set Authorization header if we have a valid token
       if (effectiveToken != null && !effectiveToken.trim().isEmpty()) {
         request.getHeaders().set("Authorization", "Bearer " + effectiveToken);
+      } else {
+        // In staging this is a critical error
+        log.error("No valid token available for OpenAI API request to: {}", request.getURI());
       }
 
       // Continue with the request

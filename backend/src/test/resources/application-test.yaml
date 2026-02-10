@@ -1,13 +1,11 @@
 spring:
   ai:
+    # In tests we disable Spring AI completely
     openai:
       api-key: "test-token"
       base-url: "http://localhost"
       chat:
-        options:
-          model: "test-model"
-          max-tokens: 100
-          temperature: 0.0
+        enabled: false
       embedding:
         enabled: false
   datasource:
@@ -19,6 +17,11 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+
+# In tests we don't require token from header
+rag:
+  token:
+    require-header-token: false
 
 logging:
   level:
