@@ -19,6 +19,7 @@ spec:
         filters:
           # Authenticate user
           - oauthGrant()
+          - forwardToken("X-TokenInfo-Forward", "access_token")
   stackLifecycle:
     scaledownTTLSeconds: {{{SCALED_DOWN_STACKS_TTL}}}
     limit: {{SCALED_DOWN_STACKS_TO_KEEP}}

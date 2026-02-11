@@ -1,0 +1,31 @@
+spring:
+  ai:
+    # In tests we disable Spring AI completely
+    openai:
+      api-key: "test-token"
+      base-url: "http://localhost"
+      chat:
+        enabled: false
+      embedding:
+        enabled: false
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+# In tests we don't require token from header
+rag:
+  token:
+    require-header-token: false
+
+logging:
+  level:
+    com.zalando.rag: DEBUG
+    org.springframework.ai: WARN
+    org.springframework.web.client: WARN
+    root: WARN
