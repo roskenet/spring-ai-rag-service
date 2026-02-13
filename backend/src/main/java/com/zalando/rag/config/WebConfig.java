@@ -15,8 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
             "http://localhost:*",
             "http://127.0.0.1:*",
             "http://192.168.178.70:*",
-            "https://*.zalan.do"
-        )
+            "https://*.zalan.do")
         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
         .allowedHeaders("*")
         .allowCredentials(false) // Disable credentials to avoid conflict
