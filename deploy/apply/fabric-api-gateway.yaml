@@ -15,7 +15,13 @@ spec:
       - zeos-rag-backend-{{{ENVIRONMENT}}}.{{{CLUSTER_ID}}}.zalan.do
     stackSetName: zeos-rag-backend-{{{ENVIRONMENT}}}
     stackVersion: {{{STACK_VERSION}}}
-
+  x-fabric-cors-support:
+    allowedOrigins:
+      - https://zeos-rag-frontend-staging.zfs-test.zalan.do
+    allowedHeaders:
+      - Authorization
+      - Content-Type
+      - X-Flow-Id
   # Service administrators
   x-fabric-admins:
     - sargutin
