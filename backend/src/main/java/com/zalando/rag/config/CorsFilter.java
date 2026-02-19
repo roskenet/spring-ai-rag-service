@@ -1,6 +1,5 @@
 package com.zalando.rag.config;
 
-import java.io.IOException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,6 +7,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -36,7 +36,8 @@ public class CorsFilter implements Filter {
     }
 
     response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    response.setHeader("Access-Control-Allow-Headers",
+    response.setHeader(
+        "Access-Control-Allow-Headers",
         "Authorization, Content-Type, X-Flow-Id, X-TokenInfo-Forward");
     response.setHeader("Access-Control-Max-Age", "3600");
     response.setHeader("Access-Control-Allow-Credentials", "false");
@@ -57,14 +58,14 @@ public class CorsFilter implements Filter {
     }
 
     // Allow localhost for development
-    if (origin.matches("https?://localhost(:\\d+)?") ||
-        origin.matches("https?://127\\.0\\.0\\.1(:\\d+)?")) {
+    if (origin.matches("https?://localhost(:\\d+)?")
+        || origin.matches("https?://127\\.0\\.0\\.1(:\\d+)?")) {
       return true;
     }
 
     // Allow zalan.do domains for staging/production
-    if (origin.matches("https://.*\\.zalan\\.do") ||
-        origin.matches("https://.*\\.zfs-test\\.zalan\\.do")) {
+    if (origin.matches("https://.*\\.zalan\\.do")
+        || origin.matches("https://.*\\.zfs-test\\.zalan\\.do")) {
       return true;
     }
 
