@@ -19,7 +19,7 @@ spec:
   x-fabric-cors-support:
     allowedOrigins:
       - zalan.do
-      - zeos-rag-backend-staging.zfs-test.zalan.do
+      - zeos-rag-frontend-staging.zfs-test.zalan.do
     allowedHeaders:
       - Authorization
       - Content-Type
