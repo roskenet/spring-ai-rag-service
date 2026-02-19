@@ -2,6 +2,7 @@ apiVersion: zalando.org/v1
 kind: FabricGateway
 metadata:
   name: "zeos-rag-backend-{{{ENVIRONMENT}}}-fabric"
+  namespace: "{{{NAMESPACE}}}"
   labels:
     application: "{{{APPLICATION_ID}}}"
     component: "zeos-rag-backend"
@@ -18,6 +19,7 @@ spec:
   x-fabric-cors-support:
     allowedOrigins:
       - zalan.do
+      - zeos-rag-backend-staging.zfs-test.zalan.do
     allowedHeaders:
       - Authorization
       - Content-Type
