@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/documents")
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin(origins = "*") // Allow frontend to access document endpoints
 public class DocumentController {
 
   private final DocumentIngestionService documentIngestionService;
