@@ -9,8 +9,21 @@ metadata:
   annotations:
     janitor/ttl: "{{{JANITOR_TTL}}}"
 spec:
-  externalIngress:
+  routegroup:
     backendPort: 8080
+    hosts:
+      - "zeos-rag-backend-{{{ENVIRONMENT}}}.{{{CLUSTER_ID}}}.zalan.do"
+    routes:
+      # Health endpoint doesn't need authentication
+      - pathSubtree: "/actuator/health"
+
+      # All API endpoints accept OAuth tokens (forwarded from frontend or direct)
+      - pathSubtree: "/api/"
+        filters:
+          # Accept OAuth tokens from X-TokenInfo-Forward header or Authorization header
+          - oauthTokeninfoAllScope("uid")
+          # Forward the tokeninfo to backend for user identification
+          - forwardToken("X-TokenInfo-Forward")
   stackLifecycle:
     scaledownTTLSeconds: {{{SCALED_DOWN_STACKS_TTL}}}
     limit: {{SCALED_DOWN_STACKS_TO_KEEP}}
