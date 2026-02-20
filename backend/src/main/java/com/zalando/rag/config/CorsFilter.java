@@ -41,6 +41,8 @@ public class CorsFilter implements Filter {
         "Authorization, Content-Type, X-Flow-Id, X-TokenInfo-Forward");
     response.setHeader("Access-Control-Max-Age", "3600");
     response.setHeader("Access-Control-Allow-Credentials", "false");
+    // Expose headers that frontend might need
+    response.setHeader("Access-Control-Expose-Headers", "X-TokenInfo-Forward, Content-Type");
 
     // Handle preflight requests
     if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
