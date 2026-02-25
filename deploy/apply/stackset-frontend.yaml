@@ -25,6 +25,12 @@ spec:
     limit: {{SCALED_DOWN_STACKS_TO_KEEP}}
   stackTemplate:
     spec:
+      configurationResources:
+      - platformCredentialsSet:
+          name: '{{COMPONENT_ID}}-{{COMPONENT_VERSION}}-{{STACK_VERSION}}-creds'
+          tokens:
+            ai-knowledge-assistant:
+              privileges: []
       version: "{{{STACK_VERSION}}}"
       replicas: {{{MIN_REPLICAS}}}
       autoscaler:
