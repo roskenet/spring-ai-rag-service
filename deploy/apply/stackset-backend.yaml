@@ -20,6 +20,7 @@ spec:
       # All API endpoints accept OAuth tokens (forwarded from frontend or direct)
       - pathSubtree: "/api/"
         filters:
+          - enableAccessLog(2,3,4,5)
           # Accept OAuth tokens from X-TokenInfo-Forward header or Authorization header
           - oauthTokeninfoAllScope("uid")
           # Forward the tokeninfo to backend for user identification
