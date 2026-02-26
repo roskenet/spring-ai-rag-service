@@ -18,6 +18,7 @@ spec:
       - pathSubtree: "/"
         filters:
           # Authenticate user
+          - enableAccessLog(2,3,4,5)
           - oauthGrant()
           - forwardToken("X-TokenInfo-Forward", "access_token")
   stackLifecycle:
