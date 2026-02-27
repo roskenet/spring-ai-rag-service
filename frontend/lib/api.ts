@@ -1,5 +1,6 @@
 // API client for ZEOS Knowledge backend integration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+// Note: Authentication is handled by Fabric Gateway automatically
+const API_BASE_URL = '/api';
 
 // Types matching backend DTOs
 export interface ChatRequest {
@@ -107,6 +108,9 @@ class ApiClient {
       const response = await fetch(url, config);
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please access through Fabric Gateway.');
+        }
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
 
@@ -137,11 +141,29 @@ class ApiClient {
       formData.append('embeddingModel', embeddingModel);
     }
 
-    return this.request<DocumentUploadResponse>('/documents/upload', {
-      method: 'POST',
-      body: formData,
-      headers: {}, // Remove Content-Type to let browser set boundary for FormData
-    });
+    const url = `${this.baseURL}/documents/upload`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          // Don't set Content-Type for FormData - let browser handle it
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please access through Fabric Gateway.');
+        }
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`File upload failed: ${url}`, error);
+      throw error;
+    }
   }
 
   async getDocuments(): Promise<DocumentDto[]> {

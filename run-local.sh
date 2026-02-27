@@ -87,6 +87,11 @@ get_ztoken() {
 start_services() {
     print_status "Building and starting services..."
 
+    # Set BACKEND_API_URL for Docker network communication
+    # The frontend container uses the backend service hostname instead of localhost
+    export BACKEND_API_URL="http://backend:8080"
+    print_status "Set BACKEND_API_URL=http://backend:8080 for Docker network communication"
+
     # Build and start all services
     $COMPOSE_CMD up --build -d
 
