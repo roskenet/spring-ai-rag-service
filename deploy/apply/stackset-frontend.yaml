@@ -28,7 +28,7 @@ spec:
     spec:
       configurationResources:
       - platformCredentialsSet:
-          name: 'zeos-rag-frontend-{{COMPONENT_VERSION}}-{{STACK_VERSION}}-creds'
+          name: 'zeos-rag-frontend-{{ENVIRONMENT}}-{{STACK_VERSION}}-creds'
           tokens:
             ai-knowledge-assistant:
               privileges: []
