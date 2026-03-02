@@ -56,7 +56,7 @@ spec:
               env:
                 - name: NODE_ENV
                   value: production
-                - name: NEXT_PUBLIC_API_URL
+                - name: BACKEND_API_URL
                   value: "https://zeos-rag-backend-{{{ENVIRONMENT}}}.{{{NAMESPACE}}}.zalan.do"
                 - name: PORT
                   value: "3000"
