@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation"
 import { ThemeProvider as MuiThemeProvider, CssBaseline, AppBar, Toolbar, Box, Typography, Container } from "@mui/material"
 import { lightTheme, darkTheme } from "@/lib/mui-theme"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { UserInfo } from "@/components/user-info"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -160,6 +161,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   Settings
                 </Typography>
               </Link>
+              <UserInfo />
               <ThemeToggle />
             </Box>
           </Toolbar>
