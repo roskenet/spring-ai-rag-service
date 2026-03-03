@@ -53,6 +53,8 @@ logging:
     org.apache.http: DEBUG
     org.apache.http.wire: TRACE
     com.zalando.rag: DEBUG
+    com.zalando.rag.config.DynamicTokenConfiguration: DEBUG
+    com.zalando.rag.service.TokenInfoService: DEBUG
     com.zalando.rag.service.VectorStoreService: TRACE
     root: WARN
 
