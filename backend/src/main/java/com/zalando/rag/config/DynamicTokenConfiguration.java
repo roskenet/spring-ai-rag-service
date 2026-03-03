@@ -95,7 +95,8 @@ public class DynamicTokenConfiguration {
 
       if (effectiveToken != null && !effectiveToken.trim().isEmpty()) {
         String maskedToken = maskToken(effectiveToken);
-        log.debug("Using token: {}", maskedToken);
+        String userContext = tokenInfoService.getUserContext();
+        log.debug("Using token: {} for user: {}", maskedToken, userContext);
       } else {
         log.debug("No token available");
       }
