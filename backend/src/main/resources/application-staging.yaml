@@ -23,5 +23,5 @@ rag:
 
 logging:
   level:
-    com.zalando.rag.service.TokenInfoService: INFO
-    com.zalando.rag.config.DynamicTokenConfiguration: INFO
+    com.zalando.rag.service.TokenInfoService: DEBUG
+    com.zalando.rag.config.DynamicTokenConfiguration: DEBUG
