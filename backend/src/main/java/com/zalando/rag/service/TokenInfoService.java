@@ -21,7 +21,47 @@ public class TokenInfoService {
   private boolean requireHeaderToken;
 
   /**
-   * Extracts the access_token from X-TokenInfo-Forward header
+   * Extracts the JWT token from Authorization header
+   *
+   * @return JWT token if found and valid, null otherwise
+   */
+  public String getAccessTokenFromAuthorizationHeader() {
+    try {
+      ServletRequestAttributes attributes =
+          (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+      if (attributes == null) {
+        log.debug("No request attributes available");
+        return null;
+      }
+
+      HttpServletRequest request = attributes.getRequest();
+      String authorizationHeader = request.getHeader("Authorization");
+
+      if (authorizationHeader == null || authorizationHeader.isEmpty()) {
+        log.debug("Authorization header not present in request");
+        return null;
+      }
+
+      // Extract Bearer token
+      if (authorizationHeader.startsWith("Bearer ")) {
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        if (token != null && !token.isEmpty()) {
+          log.info("Successfully extracted JWT token from Authorization header");
+          return token;
+        }
+      }
+
+      log.debug("Authorization header does not contain a valid Bearer token");
+      return null;
+
+    } catch (Exception e) {
+      log.warn("Error extracting JWT token from Authorization header", e);
+      return null;
+    }
+  }
+
+  /**
+   * Extracts the access_token from X-TokenInfo-Forward header (LEGACY - likely not working)
    *
    * @return access_token if found and valid, null otherwise
    */
@@ -73,13 +113,21 @@ public class TokenInfoService {
   }
 
   /**
-   * Gets the effective token to use for LLM requests. Prefers access_token from X-TokenInfo-Forward
-   * header, falls back to ZTOKEN
+   * Gets the effective token to use for LLM requests. Prefers JWT token from Authorization header,
+   * falls back to ZTOKEN
    *
    * @param fallbackToken the fallback token (usually ZTOKEN from config)
    * @return the token to use for API requests
    */
   public String getEffectiveToken(String fallbackToken) {
+    // First try to get JWT token from Authorization header (set by OAuth flow)
+    String jwtToken = getAccessTokenFromAuthorizationHeader();
+    if (jwtToken != null) {
+      log.info("Using JWT token from Authorization header for LLM request");
+      return jwtToken;
+    }
+
+    // Legacy: Try X-TokenInfo-Forward header (likely won't work as it contains claims, not token)
     String accessToken = getAccessTokenFromHeader();
     if (accessToken != null) {
       log.info("Using access_token from X-TokenInfo-Forward header for LLM request");
@@ -89,7 +137,7 @@ public class TokenInfoService {
     // In staging environment token MUST come from header
     if (requireHeaderToken) {
       log.warn(
-          "X-TokenInfo-Forward header is required in staging but not present - rejecting request");
+          "Authorization header with Bearer token is required in staging but not present - rejecting request");
       return null;
     }
 
@@ -101,7 +149,41 @@ public class TokenInfoService {
       return fallbackToken;
     }
 
-    log.debug("No valid token available - neither X-TokenInfo-Forward nor ZTOKEN");
+    log.debug("No valid token available - neither Authorization header nor ZTOKEN");
     return null;
+  }
+
+  /**
+   * Extracts user information from X-TokenInfo-Forward header This header contains decoded JWT
+   * claims like uid, realm, scope
+   *
+   * @return user context information for logging/audit purposes
+   */
+  public String getUserContext() {
+    try {
+      ServletRequestAttributes attributes =
+          (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+      if (attributes == null) {
+        return "no-request-context";
+      }
+
+      HttpServletRequest request = attributes.getRequest();
+      String tokenInfoHeader = request.getHeader("X-TokenInfo-Forward");
+
+      if (tokenInfoHeader == null || tokenInfoHeader.isEmpty()) {
+        return "no-token-info";
+      }
+
+      // Parse token info to extract user details
+      JsonNode jsonNode = objectMapper.readTree(tokenInfoHeader);
+      String uid = jsonNode.has("uid") ? jsonNode.get("uid").asText() : "unknown";
+      String realm = jsonNode.has("realm") ? jsonNode.get("realm").asText() : "unknown";
+
+      return String.format("user=%s,realm=%s", uid, realm);
+
+    } catch (Exception e) {
+      log.debug("Failed to extract user context from X-TokenInfo-Forward header", e);
+      return "context-extraction-failed";
+    }
   }
 }
