@@ -76,8 +76,6 @@ spec:
                 - name: AWS_ACCESS_KEY_ID
                   value: "{{{AWS_ACCESS_KEY_ID}}}"  # Optional - K8s service account preferred
                 - name: AWS_SECRET_ACCESS_KEY
-                  value: "{{{AWS_SECRET_ACCESS_KEY}}}"  # Optional - K8s service account preferred
-                - name: AWS_SECRET_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:
                       name: 'zeos-rag-backend-{{{ENVIRONMENT}}}-secrets'
