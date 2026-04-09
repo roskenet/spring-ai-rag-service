@@ -1,26 +1,4 @@
-FROM container-registry.zalando.net/library/eclipse-temurin-21-jdk:latest AS builder
-
-# Set working directory
-WORKDIR /app
-
-# Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-# Copy gradle wrapper and build files
-COPY gradlew ./
-COPY gradle ./gradle
-COPY build.gradle settings.gradle ./
-
-# Make gradlew executable
-RUN chmod +x gradlew
-
-# Copy source code
-COPY src ./src
-
-# Build the application
-RUN ./gradlew build -x test --no-daemon
-
-# Runtime stage
+# Use the official Eclipse Temurin JDK 21 runtime image
 FROM container-registry.zalando.net/library/eclipse-temurin-21-jdk:latest
 
 # Set working directory
@@ -32,8 +10,9 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 # Create a non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-# Copy the built JAR from builder stage
-COPY --from=builder /app/build/libs/zeos-rag-backend-1.0.0.jar app.jar
+# Copy the pre-built JAR file directly
+# The JAR should be built locally with: ./gradlew build
+COPY build/libs/zeos-rag-backend-1.0.0.jar app.jar
 
 # Change ownership to appuser
 RUN chown appuser:appuser app.jar
@@ -48,5 +27,8 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8080/actuator/health || exit 1
 
+# JVM optimization for containers
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:InitialRAMPercentage=75 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError"
+
 # Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
