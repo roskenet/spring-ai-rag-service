@@ -80,6 +80,11 @@ spec:
                   value: "{{{AWS_ACCESS_KEY_ID}}}"  # Optional - K8s service account preferred
                 - name: AWS_SECRET_ACCESS_KEY
                   value: "{{{AWS_SECRET_ACCESS_KEY}}}"  # Optional - K8s service account preferred
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: 'zeos-rag-backend-{{{ENVIRONMENT}}}-secrets'
+                      key: 'aws_secret_access_key'
               resources:
                 requests:
                   cpu: "{{{BACKEND_CPU_REQUEST}}}"

@@ -87,7 +87,8 @@ pipeline:
         default_namespace: "inbound"
         template_vars:
           <<: [ *STG_ENV, *SHARED_ENV ]
-
+          AWS_SECRET_ACCESS_KEY: "deployment-secret:2:zfs-test:AQICAHio/xEglCgY3R9ACIULrXtH8Ip/opvy59+Ua8gcImGzPgGzrZ4KDzhABy/28tMDugSbAAAA5zCB5AYJKoZIhvcNAQcGoIHWMIHTAgEAMIHNBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDB+VD5C5NIHYtffv5AIBEICBn+BN5IAQ3FI1rcgm1OzOLOTvpSxEB+F85hWZNsYUi2zo+LKI2N9SFfBN6Sq8KOOYllnboNuKBUDWr3eQwNMczY64gRAX0uSKLuNqPSXEupdkRrqtZ8wG7muOhFKceWIf1qMFqGWUlHPMNpFgb3fGagXdw9yrg2zkGDH4hx7T8CaWcXhP7VtbsT/8uzmUfsDEdl94bEBcNtKgejsm7v2LgA=="
+          AWS_ACCESS_KEY_ID: "BedrockAPIKey-1txo-at-752508157939"
   - id: traffic-stg-backend
     type: traffic
     when:
