@@ -1,8 +1,12 @@
 package com.zalando.rag.controller;
 
+import com.zalando.rag.config.RagProviderProperties;
+import com.zalando.rag.dto.ProviderHealthStatus;
 import com.zalando.rag.entity.RagConfiguration;
 import com.zalando.rag.service.ConfigurationService;
+import com.zalando.rag.service.ProviderHealthService;
 import jakarta.validation.Valid;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 public class ConfigurationController {
 
   private final ConfigurationService configurationService;
+  private final ProviderHealthService providerHealthService;
+  private final RagProviderProperties ragProviderProperties;
 
   @GetMapping
   public ResponseEntity<RagConfiguration> getActiveConfiguration() {
@@ -139,6 +145,63 @@ public class ConfigurationController {
     } catch (Exception e) {
       log.error("Error retrieving active selected model", e);
       return ResponseEntity.internalServerError().build();
+    }
+  }
+
+  // Provider health and status endpoints
+  @GetMapping("/provider-health")
+  public ResponseEntity<ProviderHealthStatus> getProviderHealth() {
+    try {
+      ProviderHealthStatus status = providerHealthService.checkProviderHealth();
+      return ResponseEntity.ok(status);
+    } catch (Exception e) {
+      log.error("Error checking provider health", e);
+      return ResponseEntity.internalServerError().build();
+    }
+  }
+
+  @GetMapping("/provider-health/quick")
+  public ResponseEntity<ProviderHealthStatus> getQuickProviderHealth() {
+    try {
+      ProviderHealthStatus status = providerHealthService.getQuickHealthStatus();
+      return ResponseEntity.ok(status);
+    } catch (Exception e) {
+      log.error("Error checking quick provider health", e);
+      return ResponseEntity.internalServerError().build();
+    }
+  }
+
+  @GetMapping("/active-provider")
+  public ResponseEntity<Map<String, Object>> getActiveProvider() {
+    try {
+      var activeProvider = ragProviderProperties.getProvider();
+      var providerConfig = getProviderConfig(activeProvider);
+
+      var response =
+          Map.of(
+              "provider", activeProvider,
+              "models",
+                  Map.of(
+                      "chat", providerConfig.getModels().getChat(),
+                      "embedding", providerConfig.getModels().getEmbedding()),
+              "dimensions", providerConfig.getDimensions(),
+              "region", providerConfig.getRegion(),
+              "enabled", providerConfig.isEnabled());
+
+      return ResponseEntity.ok(response);
+    } catch (Exception e) {
+      log.error("Error retrieving active provider information", e);
+      return ResponseEntity.internalServerError().build();
+    }
+  }
+
+  private RagProviderProperties.ProviderConfig getProviderConfig(String provider) {
+    switch (provider.toLowerCase()) {
+      case "bedrock":
+        return ragProviderProperties.getProviders().getBedrock();
+      case "zllm":
+      default:
+        return ragProviderProperties.getProviders().getZllm();
     }
   }
 }

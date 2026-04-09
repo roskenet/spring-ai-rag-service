@@ -3,6 +3,7 @@ package com.zalando.rag.service;
 import com.zalando.rag.config.RagProperties;
 import com.zalando.rag.dto.ChatRequest;
 import com.zalando.rag.dto.ChatResponse;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +24,16 @@ public class RagService {
   private final VectorStoreService vectorStoreService;
   private final ChatModel chatModel;
   private final RagProperties ragProperties;
+
+  @Value("${rag.provider:zllm}")
+  private String activeProvider;
+
+  @PostConstruct
+  public void logProviderInfo() {
+    log.info("RagService initialized with provider: {}", activeProvider);
+    log.info("ChatModel implementation: {}", chatModel.getClass().getSimpleName());
+    log.info("Provider configuration loaded successfully");
+  }
 
   private static final String RAG_PROMPT_TEMPLATE =
       """

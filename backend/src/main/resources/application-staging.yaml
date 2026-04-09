@@ -18,6 +18,7 @@ spring:
 
 # Special setting for staging - require token from header
 rag:
+  provider: ${RAG_PROVIDER:zllm}  # Allow environment override
   token:
     require-header-token: true
 
@@ -26,3 +27,7 @@ logging:
     com.zalando.rag.service.TokenInfoService: DEBUG
     com.zalando.rag.config.DynamicTokenConfiguration: DEBUG
     com.zalando.rag.config.RequestLoggingFilter: DEBUG
+    com.zalando.rag.config.BedrockConfiguration: INFO
+    com.zalando.rag.service.BedrockAuthenticationProvider: INFO
+    com.zalando.rag.service.ZllmAuthenticationProvider: INFO
+    com.zalando.rag.service.ProviderHealthService: INFO
