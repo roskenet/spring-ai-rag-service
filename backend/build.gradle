@@ -40,31 +40,30 @@ configurations {
 
 repositories {
     mavenLocal()
-    maven {
-        name = "zalando-releases"
-        url = "https://maven.zalando.net/repository/releases"
-        if (runningLocally && mavenUser && mavenPassword) {
-            credentials {
-                username = mavenUser
-                password = mavenPassword
-            }
-        }
-    }
-    maven {
-        name = "zalando-snapshots"
-        url = "https://maven.zalando.net/content/repositories/snapshots/"
-        if (runningLocally && mavenUser && mavenPassword) {
-            credentials {
-                username = mavenUser
-                password = mavenPassword
-            }
-        }
-    }
     mavenCentral()
+    // Only add Zalando repositories if credentials are available
+    if (runningLocally && mavenUser && mavenPassword) {
+        maven {
+            name = "zalando-releases"
+            url = "https://maven.zalando.net/repository/releases"
+            credentials {
+                username = mavenUser
+                password = mavenPassword
+            }
+        }
+        maven {
+            name = "zalando-snapshots"
+            url = "https://maven.zalando.net/content/repositories/snapshots/"
+            credentials {
+                username = mavenUser
+                password = mavenPassword
+            }
+        }
+    }
 }
 
 ext {
-    set('springAiVersion', "1.0.3")
+    set('springAiVersion', "1.1.4")
     set('observabilitySdkVersion', "3.1.13")
     set('baseImage', "container-registry.zalando.net/library/eclipse-temurin-21-jdk:latest")
 }
@@ -78,8 +77,11 @@ dependencies {
     implementation 'org.flywaydb:flyway-database-postgresql'
     implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
     implementation 'org.springframework.ai:spring-ai-markdown-document-reader'
-    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
     implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
+
+    // AWS Bedrock support - single provider architecture
+    implementation 'org.springframework.ai:spring-ai-starter-model-bedrock-converse'
+    implementation 'org.springframework.ai:spring-ai-starter-model-bedrock'
     runtimeOnly 'org.postgresql:postgresql'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

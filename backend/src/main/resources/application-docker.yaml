@@ -35,13 +35,10 @@ management:
 
 logging:
   level:
-    com.zalando.rag: DEBUG
+    com.zalando.rag: TRACE
     com.zalando.rag.service.VectorStoreService: TRACE
     org.springframework.ai: DEBUG
-    org.springframework.ai.openai: DEBUG
-    org.springframework.ai.openai.api: DEBUG
-    org.springframework.ai.openai.api.OpenAiApi: TRACE
-    org.springframework.ai.openai.OpenAiEmbeddingModel: TRACE
+    org.springframework.ai.bedrock: TRACE
     org.springframework.ai.vectorstore.pgvector.PgVectorStore: DEBUG
     org.springframework.web.client: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG

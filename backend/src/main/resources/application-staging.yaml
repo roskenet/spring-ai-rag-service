@@ -1,28 +1,29 @@
 spring:
   ai:
-    openai:
-      # In staging we don't set the token in configuration,
-      # it will be dynamically replaced from X-TokenInfo-Forward header
-      api-key: "dummy-token-will-be-replaced-by-interceptor"
-      base-url: https://zllm.data.zalan.do
-      chat:
-        options:
-          model: openai/gpt-4o
-          max-tokens: 4096
-          temperature: 0.7
+    bedrock:
+      aws:
+        region: ${AWS_REGION:eu-central-1}
+        # AWS credentials should be provided via environment variables or IAM roles in staging
+        access-key: ${AWS_ACCESS_KEY_ID:}
+        secret-key: ${AWS_SECRET_ACCESS_KEY:}
+      converse:
+        chat:
+          enabled: true
+          options:
+            model: anthropic.claude-sonnet-4-20250514-v1:0
+            max-tokens: 4096
+            temperature: 0.7
       embedding:
         enabled: true
         options:
-          model: openai/text-embedding-3-small
+          model: amazon.titan-embed-text-v2:0
           dimensions: 1536
 
-# Special setting for staging - require token from header
+# Bedrock-only provider configuration for staging
 rag:
-  token:
-    require-header-token: true
+  provider: bedrock
 
 logging:
   level:
-    com.zalando.rag.service.TokenInfoService: DEBUG
-    com.zalando.rag.config.DynamicTokenConfiguration: DEBUG
-    com.zalando.rag.config.RequestLoggingFilter: DEBUG
+    org.springframework.ai.bedrock: TRACE
+    com.zalando.rag: TRACE

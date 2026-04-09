@@ -54,38 +54,44 @@ check_prerequisites() {
     print_success "Prerequisites check passed!"
 }
 
-# Function to get and validate ZTOKEN
-get_ztoken() {
-    if [ -z "$ZTOKEN" ]; then
-        print_status "ZTOKEN not set, attempting to fetch using ztoken CLI..."
+# Function to validate AWS credentials
+validate_aws_credentials() {
+    if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+        print_warning "AWS credentials not provided via environment variables"
+        print_status "Checking for AWS default credentials chain..."
 
-        if ! command_exists ztoken; then
-            print_error "ZTOKEN environment variable is not set and 'ztoken' CLI tool not found!"
-            print_error "Please either:"
-            print_error "  1. Install the 'ztoken' CLI tool, OR"
-            print_error "  2. Set ZTOKEN manually: export ZTOKEN='your-jwt-token-here'"
-            exit 1
+        if command_exists aws; then
+            if aws sts get-caller-identity >/dev/null 2>&1; then
+                print_success "AWS credentials found via default credentials chain"
+                return 0
+            fi
         fi
 
-        print_status "Fetching token using ztoken CLI..."
-        ZTOKEN=$(ztoken)
-
-        if [ $? -ne 0 ] || [ -z "$ZTOKEN" ]; then
-            print_error "Failed to fetch token using 'ztoken' CLI!"
-            print_error "Please check your ztoken configuration or set ZTOKEN manually."
-            exit 1
-        fi
-
-        export ZTOKEN
-        print_success "Token fetched successfully using ztoken CLI"
+        print_error "No valid AWS credentials found!"
+        print_error "Please provide AWS credentials via:"
+        print_error "  1. Environment variables: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
+        print_error "  2. AWS credentials file (~/.aws/credentials)"
+        print_error "  3. AWS IAM roles (if running on EC2/K8s)"
+        exit 1
     else
-        print_success "Using existing ZTOKEN environment variable"
+        print_success "Using AWS credentials from environment variables"
     fi
 }
 
 # Function to build and start services
 start_services() {
     print_status "Building and starting services..."
+
+    # Build the backend JAR first
+    print_status "Building backend JAR..."
+    if ! (cd backend && ./gradlew build -x test); then
+        print_error "Failed to build backend JAR"
+        exit 1
+    fi
+    print_success "Backend JAR built successfully!"
+
+    # Enable Docker BuildKit for cache mounts to work
+    export DOCKER_BUILDKIT=1
 
     # Set BACKEND_API_URL for Docker network communication
     # The frontend container uses the backend service hostname instead of localhost
@@ -200,7 +206,7 @@ main() {
     case "${1:-start}" in
         "start")
             check_prerequisites
-            get_ztoken
+            validate_aws_credentials
             start_services
             wait_for_services
             show_status
@@ -215,7 +221,7 @@ main() {
             check_prerequisites
             print_status "Restarting services..."
             $COMPOSE_CMD down
-            get_ztoken
+            validate_aws_credentials
             start_services
             wait_for_services
             show_status
@@ -239,7 +245,9 @@ main() {
         "admin")
             print_status "Starting with PgAdmin..."
             check_prerequisites
-            get_ztoken
+            validate_aws_credentials
+            # Enable Docker BuildKit for cache mounts
+            export DOCKER_BUILDKIT=1
             $COMPOSE_CMD --profile admin up --build -d
             wait_for_services
             show_status
@@ -260,18 +268,18 @@ main() {
             echo
             echo "Prerequisites:"
             echo "  - Docker and Docker Compose installed"
-            echo "  - 'ztoken' CLI tool installed (recommended), OR"
-            echo "  - ZTOKEN environment variable set with JWT token"
+            echo "  - AWS credentials configured (see AWS Authentication below)"
             echo
-            echo "Token Options:"
-            echo "  1. Use ztoken CLI (automatic): $0 start"
-            echo "  2. Set manually: export ZTOKEN='your-jwt-token-here' && $0 start"
+            echo "AWS Authentication Options:"
+            echo "  1. Environment variables: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
+            echo "  2. AWS credentials file (~/.aws/credentials)"
+            echo "  3. AWS IAM roles (if running on EC2/K8s)"
             echo
             echo "Examples:"
-            echo "  $0 start                    # Uses ztoken CLI or existing ZTOKEN"
-            echo "  $0 logs backend            # View backend service logs"
-            echo "  $0 admin                   # Start with PgAdmin included"
-            echo "  ZTOKEN='xyz' $0 start      # Override with manual token"
+            echo "  $0 start                                          # Uses default AWS credentials"
+            echo "  AWS_ACCESS_KEY_ID=key AWS_SECRET_ACCESS_KEY=secret $0 start  # Uses explicit credentials"
+            echo "  $0 logs backend                                   # View backend service logs"
+            echo "  $0 admin                                         # Start with PgAdmin included"
             ;;
         *)
             print_error "Unknown command: $1"

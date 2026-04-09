@@ -69,7 +69,10 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/spring_ai_rag_dev
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
-      - ZTOKEN=${ZTOKEN}
+      - AWS_REGION=${AWS_REGION:-eu-central-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      # AWS credentials will be injected by K8s in production
     ports:
       - "8080:8080"
     depends_on:
@@ -115,3 +118,4 @@ services:
 volumes:
   postgres_data:
   pgadmin_data:
+  gradle_cache:

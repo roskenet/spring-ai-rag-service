@@ -3,6 +3,7 @@ package com.zalando.rag.service;
 import com.zalando.rag.config.RagProperties;
 import com.zalando.rag.dto.ChatRequest;
 import com.zalando.rag.dto.ChatResponse;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +24,16 @@ public class RagService {
   private final VectorStoreService vectorStoreService;
   private final ChatModel chatModel;
   private final RagProperties ragProperties;
+
+  @Value("${rag.provider:zllm}")
+  private String activeProvider;
+
+  @PostConstruct
+  public void logProviderInfo() {
+    log.info("RagService initialized with provider: {}", activeProvider);
+    log.info("ChatModel implementation: {}", chatModel.getClass().getSimpleName());
+    log.info("Provider configuration loaded successfully");
+  }
 
   private static final String RAG_PROMPT_TEMPLATE =
       """
@@ -40,7 +52,7 @@ public class RagService {
   public ChatResponse askQuestion(ChatRequest request) {
     long startTime = System.currentTimeMillis();
 
-    log.info("Processing question: {}", request.getQuestion());
+    log.debug("Processing question: {}", request.getQuestion());
 
     try {
       // Search for relevant documents
@@ -50,7 +62,7 @@ public class RagService {
               request.getQuestion(), request.getMaxResults(), request.getSimilarityThreshold());
 
       if (relevantDocs.isEmpty()) {
-        log.info("No relevant documents found for question: {}", request.getQuestion());
+        log.debug("No relevant documents found for question: {}", request.getQuestion());
         return createNoContextResponse(request, startTime);
       }
 
@@ -72,7 +84,7 @@ public class RagService {
 
       long responseTime = System.currentTimeMillis() - startTime;
 
-      log.info(
+      log.debug(
           "Successfully answered question in {}ms with {} sources", responseTime, sources.size());
 
       return ChatResponse.builder()
@@ -98,7 +110,7 @@ public class RagService {
   public ChatResponse askQuestionWithinDocument(String documentId, ChatRequest request) {
     long startTime = System.currentTimeMillis();
 
-    log.info("Processing question within document {}: {}", documentId, request.getQuestion());
+    log.debug("Processing question within document {}: {}", documentId, request.getQuestion());
 
     try {
       // Search for relevant documents within specific document
@@ -111,7 +123,7 @@ public class RagService {
               request.getSimilarityThreshold());
 
       if (relevantDocs.isEmpty()) {
-        log.info(
+        log.debug(
             "No relevant content found in document {} for question: {}",
             documentId,
             request.getQuestion());
@@ -151,7 +163,7 @@ public class RagService {
 
       long responseTime = System.currentTimeMillis() - startTime;
 
-      log.info(
+      log.debug(
           "Successfully answered question within document {} in {}ms with {} sources",
           documentId,
           responseTime,

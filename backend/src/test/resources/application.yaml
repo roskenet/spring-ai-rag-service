@@ -1,6 +1,15 @@
+rag:
+  provider: bedrock  # Use mock Bedrock provider for tests
+
 spring:
   application:
     name: zeos-rag-test
+  autoconfigure:
+    exclude:
+      # Exclude all Bedrock auto-configurations to use mocks instead
+      - org.springframework.ai.model.bedrock.converse.autoconfigure.BedrockConverseProxyChatAutoConfiguration
+      - org.springframework.ai.model.bedrock.titan.autoconfigure.BedrockTitanEmbeddingAutoConfiguration
+      - org.springframework.ai.model.bedrock.cohere.autoconfigure.BedrockCohereEmbeddingAutoConfiguration
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb
@@ -10,12 +19,8 @@ spring:
     hibernate:
       ddl-auto: create-drop
     database-platform: org.hibernate.dialect.H2Dialect
-  ai:
-    openai:
-      api-key: dummy-key-for-tests
-      base-url: http://localhost:8080/mock-api
 
 logging:
   level:
     org.springframework.ai: WARN
-    com.zalando.rag: INFO
+    com.zalando.rag: TRACE

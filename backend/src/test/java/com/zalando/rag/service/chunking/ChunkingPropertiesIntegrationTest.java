@@ -2,9 +2,11 @@ package com.zalando.rag.service.chunking;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.zalando.rag.RagTestConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 /**
@@ -12,6 +14,7 @@ import org.springframework.test.context.TestPropertySource;
  * application.yaml
  */
 @SpringBootTest
+@Import(RagTestConfiguration.class)
 @TestPropertySource(
     properties = {
       "rag.chunking.default-strategy=recursive",

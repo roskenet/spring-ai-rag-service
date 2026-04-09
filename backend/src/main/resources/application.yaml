@@ -1,21 +1,45 @@
 
+# RAG Provider Configuration
+# Supported environment variables:
+# - ZTOKEN: Token for zLLM authentication (when using zllm provider)
+# - AWS_ACCESS_KEY_ID: AWS Access Key for Bedrock (when using bedrock provider with explicit credentials)
+# - AWS_SECRET_ACCESS_KEY: AWS Secret Key for Bedrock (when using bedrock provider with explicit credentials)
+# - AWS_REGION: AWS Region for Bedrock (defaults to eu-central-1)
+#
+# Provider Selection:
+# - zllm: Uses Zalando's OpenAI-compatible service with JWT token authentication
+# - bedrock: Uses AWS Bedrock with Anthropic Claude and Amazon Titan models
+#
+# Authentication Methods:
+# - zLLM: JWT tokens from Authorization header, X-TokenInfo-Forward header, or ZTOKEN fallback
+# - Bedrock: AWS credentials (explicit keys or K8s service account/IAM roles)
+
 spring:
   application:
     name: spring-ai-rag-service
+  autoconfigure:
+    exclude:
+      # Exclude Cohere embedding (we want Titan only)
+      - org.springframework.ai.model.bedrock.cohere.autoconfigure.BedrockCohereEmbeddingAutoConfiguration
   ai:
-    openai:
-      api-key: ${ZTOKEN}
-      base-url: https://zllm.data.zalan.do
-      chat:
-        options:
-          model: openai/gpt-4o
-          max-tokens: 4096
-          temperature: 0.7
+    bedrock:
+      aws:
+        region: ${AWS_REGION:eu-central-1}
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+      converse:
+        chat:
+          enabled: true
+          options:
+            model: anthropic.claude-sonnet-4-20250514-v1:0
+            max-tokens: 4096
+            temperature: 0.7
       embedding:
         enabled: true
         options:
-          model: openai/text-embedding-3-small
+          model: amazon.titan-embed-text-v2:0
           dimensions: 1536
+
     vectorstore:
       pgvector:
         index-type: HNSW
@@ -42,21 +66,14 @@ logging:
   level:
     org.springframework.jdbc.core: INFO
     org.springframework.ai: DEBUG
-    org.springframework.ai.openai: DEBUG
-    org.springframework.ai.openai.api: DEBUG
-    org.springframework.ai.openai.api.OpenAiApi: TRACE
-    org.springframework.ai.openai.OpenAiEmbeddingModel: TRACE
+    org.springframework.ai.bedrock: TRACE
     org.springframework.ai.vectorstore.pgvector.PgVectorStore: DEBUG
     org.springframework.web.client: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG
     org.springframework.web.client.RestClient: DEBUG
     org.apache.http: DEBUG
     org.apache.http.wire: TRACE
-    com.zalando.rag: DEBUG
-    com.zalando.rag.config.DynamicTokenConfiguration: DEBUG
-    com.zalando.rag.config.RequestLoggingFilter: DEBUG
-    com.zalando.rag.service.TokenInfoService: DEBUG
-    com.zalando.rag.service.VectorStoreService: TRACE
+    com.zalando.rag: TRACE
     root: WARN
 
 # Application specific configuration
@@ -134,5 +151,18 @@ rag:
         overlap-size: 50
         preserve-code-blocks: false
         preserve-markdown-structure: false
+
+  # Bedrock-only provider configuration
+  provider: bedrock
+
+  providers:
+    bedrock:
+      enabled: true
+      models:
+        chat: anthropic.claude-sonnet-4-20250514-v1:0
+        embedding: amazon.titan-embed-text-v2:0
+      dimensions: 1536
+      region: ${AWS_REGION:eu-central-1}
+
 server:
   port: 8080
