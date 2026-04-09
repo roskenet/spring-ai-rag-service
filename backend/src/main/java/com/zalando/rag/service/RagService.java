@@ -52,7 +52,7 @@ public class RagService {
   public ChatResponse askQuestion(ChatRequest request) {
     long startTime = System.currentTimeMillis();
 
-    log.info("Processing question: {}", request.getQuestion());
+    log.debug("Processing question: {}", request.getQuestion());
 
     try {
       // Search for relevant documents
@@ -62,7 +62,7 @@ public class RagService {
               request.getQuestion(), request.getMaxResults(), request.getSimilarityThreshold());
 
       if (relevantDocs.isEmpty()) {
-        log.info("No relevant documents found for question: {}", request.getQuestion());
+        log.debug("No relevant documents found for question: {}", request.getQuestion());
         return createNoContextResponse(request, startTime);
       }
 
@@ -84,7 +84,7 @@ public class RagService {
 
       long responseTime = System.currentTimeMillis() - startTime;
 
-      log.info(
+      log.debug(
           "Successfully answered question in {}ms with {} sources", responseTime, sources.size());
 
       return ChatResponse.builder()
@@ -110,7 +110,7 @@ public class RagService {
   public ChatResponse askQuestionWithinDocument(String documentId, ChatRequest request) {
     long startTime = System.currentTimeMillis();
 
-    log.info("Processing question within document {}: {}", documentId, request.getQuestion());
+    log.debug("Processing question within document {}: {}", documentId, request.getQuestion());
 
     try {
       // Search for relevant documents within specific document
@@ -123,7 +123,7 @@ public class RagService {
               request.getSimilarityThreshold());
 
       if (relevantDocs.isEmpty()) {
-        log.info(
+        log.debug(
             "No relevant content found in document {} for question: {}",
             documentId,
             request.getQuestion());
@@ -163,7 +163,7 @@ public class RagService {
 
       long responseTime = System.currentTimeMillis() - startTime;
 
-      log.info(
+      log.debug(
           "Successfully answered question within document {} in {}ms with {} sources",
           documentId,
           responseTime,

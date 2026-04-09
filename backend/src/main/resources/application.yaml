@@ -67,25 +67,14 @@ logging:
   level:
     org.springframework.jdbc.core: INFO
     org.springframework.ai: DEBUG
-    org.springframework.ai.openai: DEBUG
-    org.springframework.ai.openai.api: DEBUG
-    org.springframework.ai.openai.api.OpenAiApi: TRACE
-    org.springframework.ai.openai.OpenAiEmbeddingModel: TRACE
+    org.springframework.ai.bedrock: TRACE
     org.springframework.ai.vectorstore.pgvector.PgVectorStore: DEBUG
     org.springframework.web.client: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG
     org.springframework.web.client.RestClient: DEBUG
     org.apache.http: DEBUG
     org.apache.http.wire: TRACE
-    com.zalando.rag: DEBUG
-    com.zalando.rag.config.DynamicTokenConfiguration: DEBUG
-    com.zalando.rag.config.RequestLoggingFilter: DEBUG
-    com.zalando.rag.config.BedrockConfiguration: DEBUG
-    com.zalando.rag.service.TokenInfoService: DEBUG
-    com.zalando.rag.service.BedrockAuthenticationProvider: DEBUG
-    com.zalando.rag.service.ZllmAuthenticationProvider: DEBUG
-    com.zalando.rag.service.ProviderHealthService: DEBUG
-    com.zalando.rag.service.VectorStoreService: TRACE
+    com.zalando.rag: TRACE
     root: WARN
 
 # Application specific configuration
