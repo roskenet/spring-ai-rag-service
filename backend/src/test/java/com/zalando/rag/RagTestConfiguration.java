@@ -12,8 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 /**
- * Test configuration that provides primary beans to resolve conflicts between zLLM and Bedrock
- * configurations during tests.
+ * Test configuration that provides mock ChatModel and EmbeddingModel beans for testing.
+ * These @Primary beans override any auto-configured AI model beans during tests.
  */
 @TestConfiguration
 public class RagTestConfiguration {
