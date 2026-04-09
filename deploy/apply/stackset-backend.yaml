@@ -70,9 +70,6 @@ spec:
                     secretKeyRef:
                       name: "postgres.{{{DATABASE_ID}}}-{{{ENVIRONMENT}}}-db.credentials"
                       key: password
-                # RAG Provider Configuration
-                - name: RAG_PROVIDER
-                  value: "{{{RAG_PROVIDER}}}"  # Configure via CDP variables
                 - name: AWS_REGION
                   value: "eu-central-1"
                 # AWS credentials for Bedrock (when using explicit credentials)

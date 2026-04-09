@@ -1,7 +1,6 @@
 
 # RAG Provider Configuration
 # Supported environment variables:
-# - RAG_PROVIDER: 'zllm' (default) or 'bedrock'
 # - ZTOKEN: Token for zLLM authentication (when using zllm provider)
 # - AWS_ACCESS_KEY_ID: AWS Access Key for Bedrock (when using bedrock provider with explicit credentials)
 # - AWS_SECRET_ACCESS_KEY: AWS Secret Key for Bedrock (when using bedrock provider with explicit credentials)
