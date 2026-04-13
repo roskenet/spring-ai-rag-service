@@ -31,19 +31,32 @@ public class BedrockConfiguration {
 
   @PostConstruct
   public void logBedrockConfiguration() {
-    var bedrockConfig = ragProperties.getProviders().getBedrock();
-    var authInfo = authProvider.getAuthenticationInfo();
+    log.info("=== BEDROCK CONFIGURATION DEBUG ===");
 
-    log.info("AWS Bedrock configuration activated");
-    log.info("Chat model: {}", bedrockConfig.getModels().getChat());
-    log.info("Embedding model: {}", bedrockConfig.getModels().getEmbedding());
-    log.info("AWS region: {}", bedrockConfig.getRegion());
-    log.info("Authentication method: {}", authInfo.get("authMethod"));
-    log.info("Authentication status: {}", authProvider.isAuthenticated() ? "SUCCESS" : "FAILED");
+    try {
+      var bedrockConfig = ragProperties.getProviders().getBedrock();
+      var authInfo = authProvider.getAuthenticationInfo();
 
-    // Spring AI auto-configuration will handle creating the ChatModel and EmbeddingModel beans
-    // based on the application.yaml properties
-    log.info(
-        "Spring AI auto-configuration will create ChatModel and EmbeddingModel beans from application properties");
+      log.info("AWS Bedrock configuration activated");
+      log.info("Chat model: {}", bedrockConfig.getModels().getChat());
+      log.info("Embedding model: {}", bedrockConfig.getModels().getEmbedding());
+      log.info("AWS region: {}", bedrockConfig.getRegion());
+      log.info("Authentication method: {}", authInfo.get("authMethod"));
+      log.info("Authentication status: {}", authProvider.isAuthenticated() ? "SUCCESS" : "FAILED");
+
+      // Log all authentication details for debugging
+      authInfo.forEach((key, value) -> log.info("Auth info - {}: {}", key, value));
+
+      // Spring AI auto-configuration will handle creating the ChatModel and EmbeddingModel beans
+      // based on the application.yaml properties
+      log.info(
+          "Spring AI auto-configuration will create ChatModel and EmbeddingModel beans from application properties");
+
+    } catch (Exception e) {
+      log.error("Error during Bedrock configuration initialization", e);
+      throw e;
+    }
+
+    log.info("=== END BEDROCK CONFIGURATION DEBUG ===");
   }
 }

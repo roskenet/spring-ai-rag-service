@@ -25,7 +25,7 @@ public class RagService {
   private final ChatModel chatModel;
   private final RagProperties ragProperties;
 
-  @Value("${rag.provider:zllm}")
+  @Value("${rag.provider:bedrock}")
   private String activeProvider;
 
   @PostConstruct

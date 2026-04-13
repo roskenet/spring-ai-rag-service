@@ -3,14 +3,13 @@ spring:
     bedrock:
       aws:
         region: ${AWS_REGION:eu-central-1}
-        # AWS credentials should be provided via environment variables or IAM roles in staging
-        access-key: ${AWS_ACCESS_KEY_ID:}
-        secret-key: ${AWS_SECRET_ACCESS_KEY:}
+        # AWS credentials resolved automatically via default credentials chain
+        # Platform team's infrastructure provides IAM role or EC2 instance profile access
       converse:
         chat:
           enabled: true
           options:
-            model: anthropic.claude-sonnet-4-20250514-v1:0
+            model: anthropic.claude-3-haiku-20240307-v1:0
             max-tokens: 4096
             temperature: 0.7
       embedding:

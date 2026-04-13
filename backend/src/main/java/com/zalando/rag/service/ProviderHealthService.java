@@ -28,7 +28,7 @@ public class ProviderHealthService {
   private final ChatModel chatModel;
   private final EmbeddingModel embeddingModel;
 
-  @Value("${rag.provider}")
+  @Value("${rag.provider:bedrock}")
   private String activeProvider;
 
   /**
