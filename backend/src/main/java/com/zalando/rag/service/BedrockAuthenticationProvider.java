@@ -8,24 +8,16 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
 /**
- * Authentication provider for AWS Bedrock.
+ * Authentication provider for AWS Bedrock using AWS default credentials chain.
  *
- * <p>Supports multiple authentication methods: 1. Long-term API key (BEDROCK_API_KEY environment
- * variable) 2. AWS service account (K8s IRSA, EC2 instance profiles) 3. AWS default credentials
- * chain
- *
- * <p>Priority: API key > service account > default credentials
+ * <p>Relies on platform team's AWS infrastructure setup which provides authentication via: - EC2
+ * instance profiles - ECS task roles - IAM roles for service accounts (if using EKS) - AWS
+ * credentials files - Environment variables (managed by platform)
  */
 @Component
 @ConditionalOnProperty(name = "rag.provider", havingValue = "bedrock")
 @Slf4j
 public class BedrockAuthenticationProvider implements AuthenticationProvider {
-
-  @Value("${AWS_ACCESS_KEY_ID:}")
-  private String awsAccessKeyId;
-
-  @Value("${AWS_SECRET_ACCESS_KEY:}")
-  private String awsSecretAccessKey;
 
   @Value("${AWS_REGION:eu-central-1}")
   private String awsRegion;
@@ -33,19 +25,18 @@ public class BedrockAuthenticationProvider implements AuthenticationProvider {
   @Override
   public boolean isAuthenticated() {
     try {
-      // Check if we have explicit AWS credentials
-      if (hasExplicitCredentials()) {
-        log.debug("AWS Bedrock authentication using explicit credentials");
-        return true;
-      }
-
-      // Try AWS default credentials chain (service account, instance profile, etc.)
-      DefaultCredentialsProvider.create().resolveCredentials();
-      log.debug("AWS Bedrock authentication successful via default credentials chain");
+      // Use AWS default credentials chain (platform team's infrastructure setup)
+      var credentials = DefaultCredentialsProvider.create().resolveCredentials();
+      log.info(
+          "AWS Bedrock authentication successful via default credentials chain - AccessKeyId: {}",
+          maskAccessKey(credentials.accessKeyId()));
       return true;
 
     } catch (Exception e) {
-      log.warn("AWS Bedrock authentication failed: {}", e.getMessage());
+      log.error("AWS Bedrock authentication failed: {}", e.getMessage(), e);
+      log.error("AWS region: {}", awsRegion);
+      log.error(
+          "Platform team's AWS credentials setup not available. Check: EC2 instance profile, ECS task role, IAM roles, or ~/.aws/credentials");
       return false;
     }
   }
@@ -58,8 +49,6 @@ public class BedrockAuthenticationProvider implements AuthenticationProvider {
   @Override
   public Map<String, String> getAuthenticationInfo() {
     String authMethod = determineAuthMethod();
-    String accessKeyInfo =
-        hasExplicitCredentials() ? maskAccessKey(awsAccessKeyId) : "not-provided";
 
     return Map.of(
         "provider",
@@ -68,60 +57,32 @@ public class BedrockAuthenticationProvider implements AuthenticationProvider {
         authMethod,
         "region",
         awsRegion,
-        "accessKeyId",
-        accessKeyInfo,
-        "hasSecretKey",
-        String.valueOf(hasSecretKey()),
-        "credentialsChain",
-        "default-aws-chain");
-  }
-
-  /**
-   * Checks if explicit AWS credentials are configured.
-   *
-   * @return true if both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are set
-   */
-  public boolean hasExplicitCredentials() {
-    return awsAccessKeyId != null
-        && !awsAccessKeyId.trim().isEmpty()
-        && awsSecretAccessKey != null
-        && !awsSecretAccessKey.trim().isEmpty();
-  }
-
-  /**
-   * Gets the AWS access key ID.
-   *
-   * @return access key ID if configured, null otherwise
-   */
-  public String getAccessKeyId() {
-    return hasExplicitCredentials() ? awsAccessKeyId.trim() : null;
-  }
-
-  /**
-   * Gets the AWS secret access key.
-   *
-   * @return secret access key if configured, null otherwise
-   */
-  public String getSecretAccessKey() {
-    return hasExplicitCredentials() ? awsSecretAccessKey.trim() : null;
-  }
-
-  private boolean hasSecretKey() {
-    return awsSecretAccessKey != null && !awsSecretAccessKey.trim().isEmpty();
+        "credentialsSource",
+        "aws-default-chain",
+        "awsRoleArn",
+        System.getenv("AWS_ROLE_ARN") != null ? System.getenv("AWS_ROLE_ARN") : "not-set",
+        "awsWebIdentityTokenFile",
+        System.getenv("AWS_WEB_IDENTITY_TOKEN_FILE") != null ? "present" : "not-set",
+        "containerCredentialsUri",
+        System.getenv("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI") != null ? "present" : "not-set");
   }
 
   private String determineAuthMethod() {
-    if (hasExplicitCredentials()) {
-      return "explicit-credentials";
+    // Check for Kubernetes service account with IAM role (IRSA/EKS)
+    if (System.getenv("AWS_ROLE_ARN") != null
+        && System.getenv("AWS_WEB_IDENTITY_TOKEN_FILE") != null) {
+      return "k8s-service-account-irsa";
     }
-    // Try to determine if we're in K8s with service account
-    if (System.getenv("AWS_ROLE_ARN") != null) {
-      return "k8s-service-account";
-    }
+    // Check for ECS task role
     if (System.getenv("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI") != null) {
       return "ecs-task-role";
     }
-    return "aws-default-chain";
+    // Check for EC2 instance profile
+    if (System.getenv("AWS_CONTAINER_CREDENTIALS_FULL_URI") != null) {
+      return "ec2-instance-profile";
+    }
+    // Default to AWS credentials chain (instance profile, credentials file, environment)
+    return "platform-managed-credentials";
   }
 
   private String maskAccessKey(String accessKey) {

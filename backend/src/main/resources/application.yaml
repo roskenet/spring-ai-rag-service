@@ -1,18 +1,9 @@
 
-# RAG Provider Configuration
+# AWS Bedrock RAG Configuration
+# This application uses AWS Bedrock exclusively with Anthropic Claude and Amazon Titan models.
+#
 # Supported environment variables:
-# - ZTOKEN: Token for zLLM authentication (when using zllm provider)
-# - AWS_ACCESS_KEY_ID: AWS Access Key for Bedrock (when using bedrock provider with explicit credentials)
-# - AWS_SECRET_ACCESS_KEY: AWS Secret Key for Bedrock (when using bedrock provider with explicit credentials)
 # - AWS_REGION: AWS Region for Bedrock (defaults to eu-central-1)
-#
-# Provider Selection:
-# - zllm: Uses Zalando's OpenAI-compatible service with JWT token authentication
-# - bedrock: Uses AWS Bedrock with Anthropic Claude and Amazon Titan models
-#
-# Authentication Methods:
-# - zLLM: JWT tokens from Authorization header, X-TokenInfo-Forward header, or ZTOKEN fallback
-# - Bedrock: AWS credentials (explicit keys or K8s service account/IAM roles)
 
 spring:
   application:
@@ -25,8 +16,7 @@ spring:
     bedrock:
       aws:
         region: ${AWS_REGION:eu-central-1}
-        access-key: ${AWS_ACCESS_KEY_ID}
-        secret-key: ${AWS_SECRET_ACCESS_KEY}
+        # No explicit credentials - use AWS default credentials chain
       converse:
         chat:
           enabled: true
@@ -159,7 +149,7 @@ rag:
     bedrock:
       enabled: true
       models:
-        chat: anthropic.claude-sonnet-4-20250514-v1:0
+        chat: anthropic.claude-3-haiku-20240307-v1:0
         embedding: amazon.titan-embed-text-v2:0
       dimensions: 1536
       region: ${AWS_REGION:eu-central-1}
