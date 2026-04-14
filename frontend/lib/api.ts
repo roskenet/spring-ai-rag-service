@@ -171,6 +171,9 @@ class ApiClient {
   }
 
   async deleteDocument(id: number): Promise<void> {
+    if (!id) {
+      throw new Error(`Cannot delete document: invalid id "${id}"`);
+    }
     return this.request<void>(`/documents/${id}`, {
       method: 'DELETE',
     });
