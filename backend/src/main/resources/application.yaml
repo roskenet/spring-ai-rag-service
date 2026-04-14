@@ -29,6 +29,7 @@ spring:
         options:
           model: amazon.titan-embed-text-v2:0
           dimensions: 1536
+          input-type: TEXT
 
     vectorstore:
       pgvector:
