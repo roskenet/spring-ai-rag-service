@@ -312,7 +312,7 @@ public class IntelligentChunkingStrategy implements ChunkingStrategy {
     for (String sentence : sentences) {
       // Check if adding this sentence would exceed chunk size
       if (currentChunk.length() + sentence.length() > config.getMaxChunkSize()
-          && currentChunk.length() > config.getMinChunkSize()) {
+          && currentChunk.length() > 0) {
 
         // Create chunk from current content
         String chunkContent = currentChunk.toString().trim();
@@ -327,6 +327,17 @@ public class IntelligentChunkingStrategy implements ChunkingStrategy {
       }
 
       currentChunk.append(sentence);
+
+      // If a single sentence exceeds maxChunkSize (e.g. a large code block),
+      // flush it immediately as its own chunk to avoid unbounded growth
+      if (currentChunk.length() > config.getMaxChunkSize()) {
+        String chunkContent = currentChunk.toString().trim();
+        if (!chunkContent.isEmpty()) {
+          chunks.add(
+              createChunk(chunkContent, filename, title, chunkIndex++, section.getTitle(), config));
+        }
+        currentChunk = new StringBuilder();
+      }
     }
 
     // Add remaining content as final chunk
