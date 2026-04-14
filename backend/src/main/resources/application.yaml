@@ -12,6 +12,8 @@ spring:
     exclude:
       # Exclude Cohere embedding (we want Titan only)
       - org.springframework.ai.model.bedrock.cohere.autoconfigure.BedrockCohereEmbeddingAutoConfiguration
+      # Exclude Titan autoconfigure - EmbeddingModel bean is created explicitly in BedrockConfiguration
+      - org.springframework.ai.model.bedrock.titan.autoconfigure.BedrockTitanEmbeddingAutoConfiguration
   ai:
     bedrock:
       aws:
@@ -24,12 +26,6 @@ spring:
             model: anthropic.claude-sonnet-4-20250514-v1:0
             max-tokens: 4096
             temperature: 0.7
-      titan:
-        embedding:
-          enabled: true
-          model: amazon.titan-embed-text-v2:0
-          input-type: TEXT
-
     vectorstore:
       pgvector:
         index-type: HNSW
