@@ -89,7 +89,7 @@ CREATE  TABLE IF NOT EXISTS "public".vector_store (
                                         id                   uuid DEFAULT uuid_generate_v4() NOT NULL  ,
                                         content              text    ,
                                         metadata             json    ,
-                                        embedding            vector(1024)    ,
+                                        embedding            vector(1536)    ,
                                         CONSTRAINT vector_store_pkey PRIMARY KEY ( id )
 );
 
