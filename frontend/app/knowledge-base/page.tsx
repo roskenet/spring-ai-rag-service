@@ -166,6 +166,10 @@ export default function KnowledgeBasePage() {
   };
 
   const deleteDocument = async (id: number) => {
+    if (!id) {
+      console.error('Cannot delete document: id is missing');
+      return;
+    }
     try {
       await apiClient.deleteDocument(id);
       // Reload documents to reflect the deletion

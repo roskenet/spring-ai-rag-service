@@ -52,14 +52,13 @@ logging:
   level:
     org.springframework.jdbc.core: INFO
     org.springframework.ai: DEBUG
-    org.springframework.ai.bedrock: TRACE
+    org.springframework.ai.bedrock: DEBUG
     org.springframework.ai.vectorstore.pgvector.PgVectorStore: DEBUG
     org.springframework.web.client: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG
     org.springframework.web.client.RestClient: DEBUG
-    org.apache.http: DEBUG
-    org.apache.http.wire: TRACE
-    com.zalando.rag: TRACE
+    org.apache.http: INFO
+    com.zalando.rag: DEBUG
     root: WARN
 
 # Application specific configuration
