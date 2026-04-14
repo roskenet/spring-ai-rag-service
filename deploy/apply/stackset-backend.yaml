@@ -48,6 +48,7 @@ spec:
           annotations:
             kubernetes-log-watcher/scalyr-parser: '[{"container": "zeos-rag-backend-{{{ENVIRONMENT}}}", "parser": "spring-boot-3"}]'
         spec:
+          serviceAccountName: zeos-rag-backend-service-account
           containers:
             - name: "zeos-rag-backend-{{{ENVIRONMENT}}}"
               image: "{{{CDP_REGISTRY}}}/{{{BACKEND_IMAGE}}}"
@@ -73,16 +74,6 @@ spec:
                 # AWS Bedrock Configuration
                 - name: AWS_REGION
                   value: "eu-central-1"
-                - name: AWS_ACCESS_KEY_ID
-                  valueFrom:
-                    secretKeyRef:
-                      name: "zeos-rag-backend-{{{ENVIRONMENT}}}-secrets"
-                      key: aws_access_key_id
-                - name: AWS_SECRET_ACCESS_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: "zeos-rag-backend-{{{ENVIRONMENT}}}-secrets"
-                      key: aws_secret_access_key
               resources:
                 requests:
                   cpu: "{{{BACKEND_CPU_REQUEST}}}"
