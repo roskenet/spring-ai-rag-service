@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zalando.rag.service.BedrockAuthenticationProvider;
 import io.micrometer.observation.ObservationRegistry;
 import jakarta.annotation.PostConstruct;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.bedrock.titan.BedrockTitanEmbeddingModel;
@@ -49,7 +50,7 @@ public class BedrockConfiguration {
             DefaultCredentialsProvider.create(),
             Region.of(awsRegion),
             objectMapper,
-            null);
+            Duration.ofSeconds(30));
     return new BedrockTitanEmbeddingModel(api, observationRegistry).withInputType(InputType.TEXT);
   }
 
