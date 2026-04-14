@@ -12,10 +12,10 @@ import org.springframework.ai.bedrock.titan.api.TitanEmbeddingBedrockApi;
 import org.springframework.ai.bedrock.titan.api.TitanEmbeddingBedrockApi.TitanEmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -40,7 +40,7 @@ public class BedrockConfiguration {
   private String awsRegion;
 
   @Bean
-  @Primary
+  @ConditionalOnMissingBean(EmbeddingModel.class)
   public EmbeddingModel embeddingModel(
       ObjectMapper objectMapper, ObservationRegistry observationRegistry) {
     var api =
