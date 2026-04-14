@@ -87,7 +87,7 @@ pipeline:
         default_namespace: "inbound"
         template_vars:
           <<: [ *STG_ENV, *SHARED_ENV ]
-          AWS_SECRET_ACCESS_KEY: "deployment-secret:2:zfs-test:AQICAHio/xEglCgY3R9ACIULrXtH8Ip/opvy59+Ua8gcImGzPgGzrZ4KDzhABy/28tMDugSbAAAA5zCB5AYJKoZIhvcNAQcGoIHWMIHTAgEAMIHNBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDB+VD5C5NIHYtffv5AIBEICBn+BN5IAQ3FI1rcgm1OzOLOTvpSxEB+F85hWZNsYUi2zo+LKI2N9SFfBN6Sq8KOOYllnboNuKBUDWr3eQwNMczY64gRAX0uSKLuNqPSXEupdkRrqtZ8wG7muOhFKceWIf1qMFqGWUlHPMNpFgb3fGagXdw9yrg2zkGDH4hx7T8CaWcXhP7VtbsT/8uzmUfsDEdl94bEBcNtKgejsm7v2LgA=="
+          AWS_SECRET_ACCESS_KEY: "deployment-secret:2:zfs-test:AQICAHio/xEglCgY3R9ACIULrXtH8Ip/opvy59+Ua8gcImGzPgFHdl2rzswzlwJEO6i8REP2AAAA5zCB5AYJKoZIhvcNAQcGoIHWMIHTAgEAMIHNBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDL/abr+MsRJY/GnYVgIBEICBn0L6+ZG75m6EbDnK5QoCsWJHYLcdaNkyZQNfyHwYxQh98ODRNME/aMhemzu0XxLc8lLii03n9ctuIl+ULuIZRRZ7XhSBx8nopmJ3+y/GmtYCm6BUneWIuLgfgpSitX6HOXY31CyJz7nFwTR8XwNlT1uU/elIFMdRqRNPERMtfsydcSYSI/WQbZb35BkCtLU+VpuGcto92Ycu2cRWvGOGwg=="
           AWS_ACCESS_KEY_ID: "BedrockAPIKey-1txo-at-752508157939"
   - id: traffic-stg-backend
     type: traffic
