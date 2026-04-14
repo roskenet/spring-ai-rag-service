@@ -48,6 +48,7 @@ spec:
           annotations:
             kubernetes-log-watcher/scalyr-parser: '[{"container": "zeos-rag-backend-{{{ENVIRONMENT}}}", "parser": "spring-boot-3"}]'
         spec:
+          serviceAccountName: zeos-rag-backend-service-account
           containers:
             - name: "zeos-rag-backend-{{{ENVIRONMENT}}}"
               image: "{{{CDP_REGISTRY}}}/{{{BACKEND_IMAGE}}}"
@@ -73,8 +74,6 @@ spec:
                 # AWS Bedrock Configuration
                 - name: AWS_REGION
                   value: "eu-central-1"
-                # AWS credentials will be resolved automatically by AWS SDK default credentials chain
-                # Platform engineering team's infrastructure setup will provide the necessary access
               resources:
                 requests:
                   cpu: "{{{BACKEND_CPU_REQUEST}}}"
