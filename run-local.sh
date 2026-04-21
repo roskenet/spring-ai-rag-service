@@ -54,33 +54,78 @@ check_prerequisites() {
     print_success "Prerequisites check passed!"
 }
 
-# Function to validate AWS credentials
-validate_aws_credentials() {
-    if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
-        print_warning "AWS credentials not provided via environment variables"
-        print_status "Checking for AWS default credentials chain..."
-
-        if command_exists aws; then
-            if aws sts get-caller-identity >/dev/null 2>&1; then
-                print_success "AWS credentials found via default credentials chain"
-                return 0
-            fi
+# Function to get and validate ZTOKEN
+get_ztoken() {
+    # Check if user wants to skip token refresh
+    if [ "$SKIP_ZTOKEN_REFRESH" = "true" ]; then
+        if [ -n "$ZTOKEN" ]; then
+            print_status "Skipping ZTOKEN refresh (SKIP_ZTOKEN_REFRESH=true), using existing token"
+            return
+        else
+            print_error "SKIP_ZTOKEN_REFRESH is set but no ZTOKEN found!"
+            exit 1
         fi
+    fi
 
-        print_error "No valid AWS credentials found!"
-        print_error "Please provide AWS credentials via:"
-        print_error "  1. Environment variables: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
-        print_error "  2. AWS credentials file (~/.aws/credentials)"
-        print_error "  3. AWS IAM roles (if running on EC2/K8s)"
-        exit 1
+    # Check if ztoken CLI is available
+    if command_exists ztoken; then
+        print_status "Refreshing ZTOKEN using ztoken CLI..."
+
+        # Always fetch a fresh token to avoid expiration issues
+        NEW_ZTOKEN=$(ztoken)
+
+        if [ $? -ne 0 ] || [ -z "$NEW_ZTOKEN" ]; then
+            print_error "Failed to fetch fresh token using 'ztoken' CLI!"
+
+            # Fallback to existing ZTOKEN if available
+            if [ -n "$ZTOKEN" ]; then
+                print_warning "Using existing ZTOKEN as fallback (may be expired)"
+                print_warning "Consider running 'ztoken' manually to debug the issue"
+            else
+                print_error "No fallback token available. Please check your ztoken configuration."
+                exit 1
+            fi
+        else
+            ZTOKEN="$NEW_ZTOKEN"
+            export ZTOKEN
+            print_success "Fresh token fetched successfully using ztoken CLI"
+        fi
+    elif [ -n "$ZTOKEN" ]; then
+        print_warning "ztoken CLI not available, using existing ZTOKEN environment variable"
+        print_warning "Token may be expired - consider installing ztoken CLI for automatic refresh"
     else
-        print_success "Using AWS credentials from environment variables"
+        print_error "ZTOKEN environment variable is not set and 'ztoken' CLI tool not found!"
+        print_error "Please either:"
+        print_error "  1. Install the 'ztoken' CLI tool (recommended), OR"
+        print_error "  2. Set ZTOKEN manually: export ZTOKEN='your-jwt-token-here'"
+        exit 1
+    fi
+}
+
+# Function to format code with Spotless
+format_code() {
+    print_status "Formatting backend code with Spotless..."
+
+    if [ -d "backend" ]; then
+        cd backend
+        if ./gradlew spotlessApply; then
+            print_success "Code formatting completed"
+            cd ..
+        else
+            print_warning "Code formatting failed, continuing anyway..."
+            cd ..
+        fi
+    else
+        print_warning "Backend directory not found, skipping code formatting"
     fi
 }
 
 # Function to build and start services
 start_services() {
     print_status "Building and starting services..."
+
+    # Format code before building
+    format_code
 
     # Build the backend JAR first
     print_status "Building backend JAR..."
@@ -270,16 +315,22 @@ main() {
             echo "  - Docker and Docker Compose installed"
             echo "  - AWS credentials configured (see AWS Authentication below)"
             echo
-            echo "AWS Authentication Options:"
-            echo "  1. Environment variables: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
-            echo "  2. AWS credentials file (~/.aws/credentials)"
-            echo "  3. AWS IAM roles (if running on EC2/K8s)"
+            echo "Token Options:"
+            echo "  1. Use ztoken CLI (automatic refresh): $0 start"
+            echo "  2. Set manually: export ZTOKEN='your-jwt-token-here' && $0 start"
+            echo "  3. Skip refresh: export SKIP_ZTOKEN_REFRESH=true && $0 start"
+            echo
+            echo "Token Behavior:"
+            echo "  - By default, script always refreshes ZTOKEN using ztoken CLI to avoid expiration"
+            echo "  - Set SKIP_ZTOKEN_REFRESH=true to use existing ZTOKEN without refresh"
+            echo "  - If ztoken CLI fails, falls back to existing ZTOKEN with warning"
             echo
             echo "Examples:"
-            echo "  $0 start                                          # Uses default AWS credentials"
-            echo "  AWS_ACCESS_KEY_ID=key AWS_SECRET_ACCESS_KEY=secret $0 start  # Uses explicit credentials"
-            echo "  $0 logs backend                                   # View backend service logs"
-            echo "  $0 admin                                         # Start with PgAdmin included"
+            echo "  $0 start                                    # Auto-refresh token and start"
+            echo "  $0 logs backend                            # View backend service logs"
+            echo "  $0 admin                                   # Start with PgAdmin included"
+            echo "  ZTOKEN='xyz' $0 start                      # Manual token (still refreshed if ztoken CLI available)"
+            echo "  SKIP_ZTOKEN_REFRESH=true $0 start          # Use existing token without refresh"
             ;;
         *)
             print_error "Unknown command: $1"

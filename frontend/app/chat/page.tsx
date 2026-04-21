@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { Button, Card, CardContent, Box, Paper, Typography, TextField } from "@mui/material"
-import { apiClient, generateSessionId } from "@/lib/api"
+import { apiClient, generateSessionId, generateConversationId } from "@/lib/api"
 
 interface Message {
   id: string
@@ -26,6 +26,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId] = useState(() => generateSessionId())
+  const [conversationId, setConversationId] = useState(() => generateConversationId())
   const [config, setConfig] = useState<any>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -60,10 +61,11 @@ export default function ChatPage() {
     setIsLoading(true)
 
     try {
-      // Real API call to RAG backend with user configuration
+      // Real API call to RAG backend with user configuration and conversation memory
       const requestParams: any = {
         question: input,
         sessionId: sessionId,
+        conversationId: conversationId, // Enable conversation memory
       }
 
       // Apply user configuration if available
@@ -108,8 +110,48 @@ export default function ChatPage() {
     }
   }
 
+  const startNewConversation = () => {
+    setConversationId(generateConversationId())
+    setMessages([{
+      id: "0",
+      role: "assistant",
+      content: "Hello! I'm your ZEOS Knowledge assistant. Ask me any questions about your knowledge base, and I'll search through your documents to find accurate answers.",
+      timestamp: new Date(),
+    }])
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 128px)' }}>
+      {/* Conversation Header */}
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        mb: 2,
+        p: 2,
+        bgcolor: 'background.paper',
+        borderRadius: 1,
+        border: 1,
+        borderColor: 'divider'
+      }}>
+        <Box>
+          <Typography variant="body2" color="text.secondary">
+            Conversation: {conversationId.slice(-8)}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Memory enabled - AI will remember this conversation
+          </Typography>
+        </Box>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={startNewConversation}
+          sx={{ minWidth: 140 }}
+        >
+          New Conversation
+        </Button>
+      </Box>
+
       {/* Messages Area */}
       <Box sx={{ flex: 1, overflowY: 'auto', mb: 2, px: 1 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

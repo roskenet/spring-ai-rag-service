@@ -3,17 +3,20 @@ package com.zalando.rag.service;
 import com.zalando.rag.config.RagProperties;
 import com.zalando.rag.dto.ChatRequest;
 import com.zalando.rag.dto.ChatResponse;
-import jakarta.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,30 +26,24 @@ public class RagService {
 
   private final VectorStoreService vectorStoreService;
   private final ChatModel chatModel;
+  private final ChatMemory chatMemory;
+  private final ConversationMemoryService conversationMemoryService;
   private final RagProperties ragProperties;
 
-  @Value("${rag.provider:bedrock}")
-  private String activeProvider;
-
-  @PostConstruct
-  public void logProviderInfo() {
-    log.info("RagService initialized with provider: {}", activeProvider);
-    log.info("ChatModel implementation: {}", chatModel.getClass().getSimpleName());
-    log.info("Provider configuration loaded successfully");
-  }
-
-  private static final String RAG_PROMPT_TEMPLATE =
+  private static final String RAG_SYSTEM_PROMPT =
       """
-            You are a helpful AI assistant that answers questions based on the provided context.
-            Use the following context to answer the question. If the answer is not in the context,
+            You are a helpful AI assistant that answers questions based on the provided context from documents.
+            Use the following context to answer questions. If the answer is not in the context,
             say "I don't have enough information to answer this question based on the provided documents."
 
-            Context:
+            You can refer to previous parts of our conversation to provide better, more coherent answers.
+            """;
+
+  private static final String RAG_CONTEXT_TEMPLATE =
+      """
+            Here is the relevant context from the documents for your current question:
+
             {context}
-
-            Question: {question}
-
-            Answer:
             """;
 
   public ChatResponse askQuestion(ChatRequest request) {
@@ -55,28 +52,80 @@ public class RagService {
     log.debug("Processing question: {}", request.getQuestion());
 
     try {
+      // Determine conversation ID (use conversationId if provided, otherwise sessionId)
+      String conversationId =
+          request.getConversationId() != null
+              ? request.getConversationId()
+              : request.getSessionId();
+
+      if (conversationId == null) {
+        conversationId = "default-conversation";
+        log.warn("No conversation ID or session ID provided, using default");
+      }
+
       // Search for relevant documents
-      // TODO: Work in progress - Will implement similarity score tracking later
       List<Document> relevantDocs =
           vectorStoreService.searchSimilar(
               request.getQuestion(), request.getMaxResults(), request.getSimilarityThreshold());
 
+      String answer;
       if (relevantDocs.isEmpty()) {
-        log.debug("No relevant documents found for question: {}", request.getQuestion());
-        return createNoContextResponse(request, startTime);
+        log.info("No relevant documents found for question: {}", request.getQuestion());
+
+        // Get optimized conversation history to check if this is the first message
+        var existingMessages = conversationMemoryService.getOptimizedMessages(conversationId);
+        boolean hasConversationHistory = !existingMessages.isEmpty();
+
+        if (!hasConversationHistory) {
+          // First message without documents - no information available
+          log.info("First message in conversation without relevant documents");
+          answer =
+              "I don't have enough information to answer this question based on the available documents. "
+                  + "Please make sure relevant documents have been uploaded and processed.";
+        } else {
+          // Has conversation history - allow AI to answer based on context
+          log.info("No new documents found, but using conversation history for context");
+
+          var messages = new ArrayList<>(existingMessages);
+          messages.add(new SystemMessage(RAG_SYSTEM_PROMPT));
+          messages.add(new UserMessage(request.getQuestion()));
+
+          // Use chat model with memory for questions with conversation context
+          answer = chatModel.call(new Prompt(messages)).getResult().getOutput().getText();
+
+          if (answer == null || answer.trim().isEmpty()) {
+            answer =
+                "I'm sorry, I couldn't generate a response. Please try rephrasing your question.";
+          }
+        }
+
+        // Store the conversation using optimized memory service
+        conversationMemoryService.addMessage(
+            conversationId, new UserMessage(request.getQuestion()));
+        conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
+      } else {
+        // Build context from relevant documents
+        String context = buildContext(relevantDocs);
+
+        // Create context message with template
+        PromptTemplate contextTemplate = new PromptTemplate(RAG_CONTEXT_TEMPLATE);
+        String contextMessage = contextTemplate.render(Map.of("context", context));
+
+        // Get optimized conversation history with context
+        var messages =
+            new ArrayList<>(conversationMemoryService.getOptimizedMessages(conversationId));
+        messages.add(new SystemMessage(RAG_SYSTEM_PROMPT));
+        messages.add(
+            new UserMessage(contextMessage + "\n\nUser question: " + request.getQuestion()));
+
+        // Use chat model with memory, providing context and user question
+        answer = chatModel.call(new Prompt(messages)).getResult().getOutput().getText();
+
+        // Store the conversation using optimized memory service
+        conversationMemoryService.addMessage(
+            conversationId, new UserMessage(request.getQuestion()));
+        conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
       }
-
-      // Build context from relevant documents
-      String context = buildContext(relevantDocs);
-
-      // Create prompt
-      PromptTemplate promptTemplate = new PromptTemplate(RAG_PROMPT_TEMPLATE);
-      Prompt prompt =
-          promptTemplate.create(Map.of("context", context, "question", request.getQuestion()));
-
-      // Get answer from AI
-      org.springframework.ai.chat.model.ChatResponse aiResponse = chatModel.call(prompt);
-      String answer = aiResponse.getResult().getOutput().getText();
 
       // Build response with sources
       List<ChatResponse.SourceDocument> sources =
@@ -84,8 +133,11 @@ public class RagService {
 
       long responseTime = System.currentTimeMillis() - startTime;
 
-      log.debug(
-          "Successfully answered question in {}ms with {} sources", responseTime, sources.size());
+      log.info(
+          "Successfully answered question in {}ms with {} sources for conversation: {}",
+          responseTime,
+          sources.size(),
+          conversationId);
 
       return ChatResponse.builder()
           .question(request.getQuestion())
@@ -113,8 +165,18 @@ public class RagService {
     log.debug("Processing question within document {}: {}", documentId, request.getQuestion());
 
     try {
+      // Determine conversation ID (use conversationId if provided, otherwise sessionId)
+      String conversationId =
+          request.getConversationId() != null
+              ? request.getConversationId()
+              : request.getSessionId();
+
+      if (conversationId == null) {
+        conversationId = "doc-" + documentId + "-conversation";
+        log.warn("No conversation ID or session ID provided for document query, using default");
+      }
+
       // Search for relevant documents within specific document
-      // TODO: Work in progress - Will implement similarity score tracking later
       List<Document> relevantDocs =
           vectorStoreService.searchSimilarByDocument(
               request.getQuestion(),
@@ -122,40 +184,75 @@ public class RagService {
               request.getMaxResults(),
               request.getSimilarityThreshold());
 
+      String documentSpecificSystemPrompt =
+          """
+                    You are a helpful AI assistant answering questions about a specific document.
+                    Use the following context from the document to answer questions.
+                    If the answer is not in the provided context, say "I don't have enough information
+                    to answer this question based on the content of this document."
+
+                    You can refer to previous parts of our conversation about this document to provide better answers.
+                    """;
+
+      String answer;
       if (relevantDocs.isEmpty()) {
         log.debug(
             "No relevant content found in document {} for question: {}",
             documentId,
             request.getQuestion());
-        return createNoContextResponse(request, startTime);
+
+        // Get optimized conversation history to check if this is the first message
+        var existingMessages = conversationMemoryService.getOptimizedMessages(conversationId);
+        boolean hasConversationHistory = !existingMessages.isEmpty();
+
+        if (!hasConversationHistory) {
+          // First message about document without relevant content
+          log.info("First message about document {} without relevant content", documentId);
+          answer =
+              "I don't have enough information to answer this question based on the content of this document.";
+        } else {
+          // Has conversation history about this document - allow AI to answer based on context
+          log.info(
+              "No new content found in document {}, but using conversation history for context",
+              documentId);
+
+          var messages = new ArrayList<>(existingMessages);
+          messages.add(new SystemMessage(documentSpecificSystemPrompt));
+          messages.add(new UserMessage(request.getQuestion()));
+
+          answer = chatModel.call(new Prompt(messages)).getResult().getOutput().getText();
+
+          if (answer == null || answer.trim().isEmpty()) {
+            answer =
+                "I'm sorry, I couldn't generate a response. Please try rephrasing your question.";
+          }
+        }
+
+        // Store the conversation using optimized memory service
+        conversationMemoryService.addMessage(
+            conversationId, new UserMessage(request.getQuestion()));
+        conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
+      } else {
+        // Build context from relevant documents
+        String context = buildContext(relevantDocs);
+
+        // Create context message with template
+        PromptTemplate contextTemplate = new PromptTemplate(RAG_CONTEXT_TEMPLATE);
+        String contextMessage = contextTemplate.render(Map.of("context", context));
+
+        var messages =
+            new ArrayList<>(conversationMemoryService.getOptimizedMessages(conversationId));
+        messages.add(new SystemMessage(documentSpecificSystemPrompt));
+        messages.add(
+            new UserMessage(contextMessage + "\n\nUser question: " + request.getQuestion()));
+
+        answer = chatModel.call(new Prompt(messages)).getResult().getOutput().getText();
+
+        // Store the conversation using optimized memory service
+        conversationMemoryService.addMessage(
+            conversationId, new UserMessage(request.getQuestion()));
+        conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
       }
-
-      // Build context from relevant documents
-      String context = buildContext(relevantDocs);
-
-      // Create prompt with document-specific context
-      String documentSpecificPrompt =
-          """
-                    You are a helpful AI assistant answering questions about a specific document.
-                    Use the following context from the document to answer the question.
-                    If the answer is not in the provided context, say "I don't have enough information
-                    to answer this question based on the content of this document."
-
-                    Context from document:
-                    {context}
-
-                    Question: {question}
-
-                    Answer:
-                    """;
-
-      PromptTemplate promptTemplate = new PromptTemplate(documentSpecificPrompt);
-      Prompt prompt =
-          promptTemplate.create(Map.of("context", context, "question", request.getQuestion()));
-
-      // Get answer from AI
-      org.springframework.ai.chat.model.ChatResponse aiResponse = chatModel.call(prompt);
-      String answer = aiResponse.getResult().getOutput().getText();
 
       // Build response with sources
       List<ChatResponse.SourceDocument> sources =
@@ -163,11 +260,12 @@ public class RagService {
 
       long responseTime = System.currentTimeMillis() - startTime;
 
-      log.debug(
-          "Successfully answered question within document {} in {}ms with {} sources",
+      log.info(
+          "Successfully answered question within document {} in {}ms with {} sources for conversation: {}",
           documentId,
           responseTime,
-          sources.size());
+          sources.size(),
+          conversationId);
 
       return ChatResponse.builder()
           .question(request.getQuestion())
@@ -230,17 +328,5 @@ public class RagService {
       return content;
     }
     return content.substring(0, maxLength) + "...";
-  }
-
-  private ChatResponse createNoContextResponse(ChatRequest request, long startTime) {
-    long responseTime = System.currentTimeMillis() - startTime;
-    return ChatResponse.builder()
-        .question(request.getQuestion())
-        .answer(
-            "I don't have enough information to answer this question based on the available documents. "
-                + "Please make sure relevant documents have been uploaded and processed.")
-        .sources(List.of())
-        .responseTimeMs(responseTime)
-        .build();
   }
 }
