@@ -11,6 +11,7 @@ import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class VectorStoreService {
 
   private final VectorStore vectorStore;
+  private final JdbcTemplate jdbcTemplate;
 
   /** Add documents to the vector store */
   public void addDocuments(List<Document> documents) {
@@ -161,16 +163,25 @@ public class VectorStoreService {
         .collect(Collectors.toList());
   }
 
+  /** Check if vector store has any chunks for the given document ID */
+  public boolean hasChunks(String documentId) {
+    Integer count =
+        jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM vector_store WHERE metadata->>'document_id' = ?",
+            Integer.class,
+            documentId);
+    return count != null && count > 0;
+  }
+
   /** Delete documents by document ID */
   public void deleteByDocumentId(String documentId) {
     try {
-      log.info("Deleting documents with document_id: {}", documentId);
-
-      Filter.Expression filterExpression =
-          new FilterExpressionBuilder().eq("document_id", documentId).build();
-
-      vectorStore.delete(List.of(documentId));
-      log.info("Successfully deleted documents with document_id: {}", documentId);
+      log.info("Deleting vector store chunks with document_id: {}", documentId);
+      int deleted =
+          jdbcTemplate.update(
+              "DELETE FROM vector_store WHERE metadata->>'document_id' = ?", documentId);
+      log.info(
+          "Successfully deleted {} vector store chunks with document_id: {}", deleted, documentId);
     } catch (Exception e) {
       log.error("Error deleting documents with document_id: {}", documentId, e);
       throw new RuntimeException("Failed to delete documents from vector store", e);

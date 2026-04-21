@@ -18,5 +18,5 @@ rag:
 
 logging:
   level:
-    org.springframework.ai.bedrock: TRACE
-    com.zalando.rag: TRACE
+    org.springframework.ai.bedrock: INFO
+    com.zalando.rag: INFO

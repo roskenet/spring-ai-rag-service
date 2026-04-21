@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class MockVectorStoreService extends VectorStoreService {
 
   public MockVectorStoreService() {
-    super(null); // No actual vector store needed for mock
+    super(null, null); // No actual vector store needed for mock
   }
 
   @Override
@@ -75,6 +75,12 @@ public class MockVectorStoreService extends VectorStoreService {
         query,
         documentId);
     return searchSimilar(query, maxResults, similarityThreshold);
+  }
+
+  @Override
+  public boolean hasChunks(String documentId) {
+    log.warn("MOCK MODE: Simulating hasChunks check for document ID: {}", documentId);
+    return true;
   }
 
   @Override
