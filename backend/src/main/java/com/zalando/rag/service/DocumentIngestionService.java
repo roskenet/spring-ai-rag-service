@@ -52,8 +52,24 @@ public class DocumentIngestionService {
     // Check if document already exists
     Optional<Document> existingDoc = documentRepository.findByContentHash(contentHash);
     if (existingDoc.isPresent()) {
-      log.info("Document with same content already exists: {}", existingDoc.get().getFilename());
-      return existingDoc.get();
+      Document existing = existingDoc.get();
+      boolean needsReprocessing =
+          existing.getStatus() == Document.DocumentStatus.FAILED
+              || existing.getStatus() == Document.DocumentStatus.UPLOADED
+              || (existing.getStatus() == Document.DocumentStatus.PROCESSED
+                  && !vectorStoreService.hasChunks(existing.getId().toString()));
+      if (!needsReprocessing) {
+        log.info(
+            "Document already exists and is indexed in vector store: {}", existing.getFilename());
+        return existing;
+      }
+      log.info(
+          "Document exists (status={}) but is missing from vector store, reprocessing: {}",
+          existing.getStatus(),
+          existing.getFilename());
+      vectorStoreService.deleteByDocumentId(existing.getId().toString());
+      processDocumentAsync(existing, processingOptions);
+      return existing;
     }
 
     // Extract title from content (first non-empty line or filename)
