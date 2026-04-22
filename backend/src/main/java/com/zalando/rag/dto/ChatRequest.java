@@ -19,7 +19,7 @@ public class ChatRequest {
 
   @Builder.Default private int maxResults = 5;
 
-  @Builder.Default private double similarityThreshold = 0.7;
+  @Builder.Default private double similarityThreshold = 0.3;
 
   @Builder.Default private boolean includeSourceInfo = true;
 
