@@ -329,12 +329,21 @@ public class IntelligentChunkingStrategy implements ChunkingStrategy {
       currentChunk.append(sentence);
 
       // If a single sentence exceeds maxChunkSize (e.g. a large code block),
-      // flush it immediately as its own chunk to avoid unbounded growth
+      // split it into fixed-size pieces to avoid exceeding embedding model token limits
       if (currentChunk.length() > config.getMaxChunkSize()) {
         String chunkContent = currentChunk.toString().trim();
         if (!chunkContent.isEmpty()) {
-          chunks.add(
-              createChunk(chunkContent, filename, title, chunkIndex++, section.getTitle(), config));
+          int splitSize = config.getMaxChunkSize();
+          for (int offset = 0; offset < chunkContent.length(); offset += splitSize) {
+            String piece =
+                chunkContent
+                    .substring(offset, Math.min(offset + splitSize, chunkContent.length()))
+                    .trim();
+            if (!piece.isEmpty()) {
+              chunks.add(
+                  createChunk(piece, filename, title, chunkIndex++, section.getTitle(), config));
+            }
+          }
         }
         currentChunk = new StringBuilder();
       }
