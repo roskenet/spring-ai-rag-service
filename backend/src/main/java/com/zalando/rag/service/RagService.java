@@ -72,37 +72,34 @@ public class RagService {
       if (relevantDocs.isEmpty()) {
         log.info("No relevant documents found for question: {}", request.getQuestion());
 
-        // Get optimized conversation history to check if this is the first message
         var existingMessages = conversationMemoryService.getOptimizedMessages(conversationId);
         boolean hasConversationHistory = !existingMessages.isEmpty();
 
         if (!hasConversationHistory) {
-          // First message without documents - no information available
           log.info("First message in conversation without relevant documents");
           answer =
               "I don't have enough information to answer this question based on the available documents. "
                   + "Please make sure relevant documents have been uploaded and processed.";
+          // Do not store in history - no real context was established yet
         } else {
-          // Has conversation history - allow AI to answer based on context
-          log.info("No new documents found, but using conversation history for context");
+          // Documents were found in earlier turns - answer based on conversation history
+          log.info("No new documents found, answering based on conversation history");
 
           var messages = new ArrayList<>(existingMessages);
           messages.add(new SystemMessage(RAG_SYSTEM_PROMPT));
           messages.add(new UserMessage(request.getQuestion()));
 
-          // Use chat model with memory for questions with conversation context
           answer = chatModel.call(new Prompt(messages)).getResult().getOutput().getText();
 
           if (answer == null || answer.trim().isEmpty()) {
             answer =
                 "I'm sorry, I couldn't generate a response. Please try rephrasing your question.";
           }
-        }
 
-        // Store the conversation using optimized memory service
-        conversationMemoryService.addMessage(
-            conversationId, new UserMessage(request.getQuestion()));
-        conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
+          conversationMemoryService.addMessage(
+              conversationId, new UserMessage(request.getQuestion()));
+          conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
+        }
       } else {
         // Build context from relevant documents
         String context = buildContext(relevantDocs);
@@ -201,19 +198,18 @@ public class RagService {
             documentId,
             request.getQuestion());
 
-        // Get optimized conversation history to check if this is the first message
         var existingMessages = conversationMemoryService.getOptimizedMessages(conversationId);
         boolean hasConversationHistory = !existingMessages.isEmpty();
 
         if (!hasConversationHistory) {
-          // First message about document without relevant content
           log.info("First message about document {} without relevant content", documentId);
           answer =
               "I don't have enough information to answer this question based on the content of this document.";
+          // Do not store in history - no real context was established yet
         } else {
-          // Has conversation history about this document - allow AI to answer based on context
+          // Documents were found in earlier turns - answer based on conversation history
           log.info(
-              "No new content found in document {}, but using conversation history for context",
+              "No new content found in document {}, answering based on conversation history",
               documentId);
 
           var messages = new ArrayList<>(existingMessages);
@@ -226,12 +222,11 @@ public class RagService {
             answer =
                 "I'm sorry, I couldn't generate a response. Please try rephrasing your question.";
           }
-        }
 
-        // Store the conversation using optimized memory service
-        conversationMemoryService.addMessage(
-            conversationId, new UserMessage(request.getQuestion()));
-        conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
+          conversationMemoryService.addMessage(
+              conversationId, new UserMessage(request.getQuestion()));
+          conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
+        }
       } else {
         // Build context from relevant documents
         String context = buildContext(relevantDocs);
