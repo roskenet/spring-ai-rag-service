@@ -80,6 +80,7 @@ public class RagService {
           answer =
               "I don't have enough information to answer this question based on the available documents. "
                   + "Please make sure relevant documents have been uploaded and processed.";
+          // Do not store in history - no real context was established yet
         } else {
           // Documents were found in earlier turns - answer based on conversation history
           log.info("No new documents found, answering based on conversation history");
@@ -94,12 +95,11 @@ public class RagService {
             answer =
                 "I'm sorry, I couldn't generate a response. Please try rephrasing your question.";
           }
-        }
 
-        // Store the conversation using optimized memory service
-        conversationMemoryService.addMessage(
-            conversationId, new UserMessage(request.getQuestion()));
-        conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
+          conversationMemoryService.addMessage(
+              conversationId, new UserMessage(request.getQuestion()));
+          conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
+        }
       } else {
         // Build context from relevant documents
         String context = buildContext(relevantDocs);
@@ -205,6 +205,7 @@ public class RagService {
           log.info("First message about document {} without relevant content", documentId);
           answer =
               "I don't have enough information to answer this question based on the content of this document.";
+          // Do not store in history - no real context was established yet
         } else {
           // Documents were found in earlier turns - answer based on conversation history
           log.info(
@@ -221,12 +222,11 @@ public class RagService {
             answer =
                 "I'm sorry, I couldn't generate a response. Please try rephrasing your question.";
           }
-        }
 
-        // Store the conversation using optimized memory service
-        conversationMemoryService.addMessage(
-            conversationId, new UserMessage(request.getQuestion()));
-        conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
+          conversationMemoryService.addMessage(
+              conversationId, new UserMessage(request.getQuestion()));
+          conversationMemoryService.addMessage(conversationId, new AssistantMessage(answer));
+        }
       } else {
         // Build context from relevant documents
         String context = buildContext(relevantDocs);
