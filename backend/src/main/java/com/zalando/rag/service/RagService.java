@@ -39,6 +39,13 @@ public class RagService {
             You can refer to previous parts of our conversation to provide better, more coherent answers.
             """;
 
+  private static final String RAG_HISTORY_ONLY_PROMPT =
+      """
+            You are a helpful AI assistant. Answer the question strictly based on the conversation history above.
+            Do NOT use any general knowledge or information outside of what has been discussed in this conversation.
+            If the answer cannot be found in the conversation history, say "I don't have enough information to answer this question based on our conversation and the available documents."
+            """;
+
   private static final String RAG_CONTEXT_TEMPLATE =
       """
             Here is the relevant context from the documents for your current question:
@@ -86,7 +93,7 @@ public class RagService {
           log.info("No new documents found, answering based on conversation history");
 
           var messages = new ArrayList<>(existingMessages);
-          messages.add(new SystemMessage(RAG_SYSTEM_PROMPT));
+          messages.add(new SystemMessage(RAG_HISTORY_ONLY_PROMPT));
           messages.add(new UserMessage(request.getQuestion()));
 
           answer = chatModel.call(new Prompt(messages)).getResult().getOutput().getText();
@@ -213,7 +220,7 @@ public class RagService {
               documentId);
 
           var messages = new ArrayList<>(existingMessages);
-          messages.add(new SystemMessage(documentSpecificSystemPrompt));
+          messages.add(new SystemMessage(RAG_HISTORY_ONLY_PROMPT));
           messages.add(new UserMessage(request.getQuestion()));
 
           answer = chatModel.call(new Prompt(messages)).getResult().getOutput().getText();
