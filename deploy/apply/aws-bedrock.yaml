@@ -1,0 +1,17 @@
+ApplicationInferenceProfile:
+  Type: AWS::Bedrock::ApplicationInferenceProfile
+  Properties:
+    Description: "Inference profile for application"
+    InferenceProfileName:
+      !Sub "{{APPLICATION_ID}}-{{ENVIRONMENT}}-claude-sonnet-4-20250514-v1"
+    ModelSource:
+      CopyFrom: "arn:aws:bedrock:eu-central-1::inference-profile/eu.anthropic.claude-sonnet-4-20250514-v1:0"
+    Tags:
+      - Key: application
+        Value: "{{APPLICATION_ID}}"
+      - Key: environment
+        Value: "{{ENVIRONMENT}}"
+      - Key: team
+        Value: "{{TEAM_ID}}"
+      - Key: component
+        Value: "{{COMPONENT_ID}}"
