@@ -27,4 +27,4 @@ Resources:
                   - "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v2:0"
                   - "arn:aws:bedrock:*::foundation-model/anthropic.claude-*"
                   - "arn:aws:bedrock:*::inference-profile/eu.anthropic.claude-*"
-                  - "arn:aws:bedrock:*:*:application-inference-profile/*"
+                  - !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:application-inference-profile/*"
