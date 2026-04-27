@@ -1,17 +1,34 @@
-ApplicationInferenceProfile:
-  Type: AWS::Bedrock::ApplicationInferenceProfile
-  Properties:
-    Description: "Inference profile for application"
-    InferenceProfileName:
-      !Sub "{{APPLICATION_ID}}-{{ENVIRONMENT}}-claude-sonnet-4-20250514-v1"
-    ModelSource:
-      CopyFrom: "arn:aws:bedrock:eu-central-1::inference-profile/eu.anthropic.claude-sonnet-4-20250514-v1:0"
-    Tags:
-      - Key: application
-        Value: "{{APPLICATION_ID}}"
-      - Key: environment
-        Value: "{{ENVIRONMENT}}"
-      - Key: team
-        Value: "{{TEAM_ID}}"
-      - Key: component
-        Value: "{{COMPONENT_ID}}"
+Metadata:
+  StackName: "{{{APPLICATION_ID}}}-{{{ENVIRONMENT}}}-bedrock"
+  Tags:
+    application: "{{{APPLICATION_ID}}}"
+    environment: "{{{ENVIRONMENT}}}"
+    team: "{{{TEAM_ID}}}"
+    component: "{{{COMPONENT_ID}}}"
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Bedrock Application Inference Profile for {{{APPLICATION_ID}}} ({{{ENVIRONMENT}}})"
+
+Resources:
+  ApplicationInferenceProfile:
+    Type: AWS::Bedrock::ApplicationInferenceProfile
+    Properties:
+      Description: "Inference profile for {{{APPLICATION_ID}}} in {{{ENVIRONMENT}}}"
+      InferenceProfileName: "{{{APPLICATION_ID}}}-{{{ENVIRONMENT}}}-claude-sonnet-4"
+      ModelSource:
+        CopyFrom: "arn:aws:bedrock:eu-central-1::inference-profile/eu.anthropic.claude-sonnet-4-20250514-v1:0"
+      Tags:
+        - Key: application
+          Value: "{{{APPLICATION_ID}}}"
+        - Key: environment
+          Value: "{{{ENVIRONMENT}}}"
+        - Key: team
+          Value: "{{{TEAM_ID}}}"
+        - Key: component
+          Value: "{{{COMPONENT_ID}}}"
+
+Outputs:
+  InferenceProfileArn:
+    Description: "ARN of the Bedrock Application Inference Profile"
+    Value: !GetAtt ApplicationInferenceProfile.InferenceProfileArn
+    Export:
+      Name: "{{{APPLICATION_ID}}}-{{{ENVIRONMENT}}}-InferenceProfileArn"
