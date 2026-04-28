@@ -1,0 +1,44 @@
+Metadata:
+  StackName: "{{{APPLICATION_ID}}}-{{{ENVIRONMENT}}}-bedrock"
+  Tags:
+    application: "{{{APPLICATION_ID}}}"
+    environment: "{{{ENVIRONMENT}}}"
+    team: "{{{TEAM_ID}}}"
+    component: "{{{COMPONENT_ID}}}"
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Bedrock Application Inference Profile for {{{APPLICATION_ID}}} ({{{ENVIRONMENT}}})"
+
+Parameters:
+  SourceInferenceProfileId:
+    Type: String
+    Default: "{{{BEDROCK_SOURCE_INFERENCE_PROFILE_ID}}}"
+    Description: "Bedrock cross-region inference profile id to copy from (e.g. eu.anthropic.claude-sonnet-4-20250514-v1:0)"
+  InferenceProfileSuffix:
+    Type: String
+    Default: "{{{BEDROCK_INFERENCE_PROFILE_SUFFIX}}}"
+    Description: "Human-readable suffix appended to the application inference profile name"
+
+Resources:
+  ApplicationInferenceProfile:
+    Type: AWS::Bedrock::ApplicationInferenceProfile
+    Properties:
+      Description: "Inference profile for {{{APPLICATION_ID}}} in {{{ENVIRONMENT}}}"
+      InferenceProfileName: !Sub "{{{APPLICATION_ID}}}-{{{ENVIRONMENT}}}-${InferenceProfileSuffix}"
+      ModelSource:
+        CopyFrom: !Sub "arn:aws:bedrock:${AWS::Region}::inference-profile/${SourceInferenceProfileId}"
+      Tags:
+        - Key: application
+          Value: "{{{APPLICATION_ID}}}"
+        - Key: environment
+          Value: "{{{ENVIRONMENT}}}"
+        - Key: team
+          Value: "{{{TEAM_ID}}}"
+        - Key: component
+          Value: "{{{COMPONENT_ID}}}"
+
+Outputs:
+  InferenceProfileArn:
+    Description: "ARN of the Bedrock Application Inference Profile"
+    Value: !GetAtt ApplicationInferenceProfile.InferenceProfileArn
+    Export:
+      Name: "{{{APPLICATION_ID}}}-{{{ENVIRONMENT}}}-InferenceProfileArn"

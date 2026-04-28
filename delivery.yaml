@@ -21,6 +21,9 @@ shared_vars: &SHARED_ENV
   DB_SIZE: "10Gi"
   DB_NAME: "spring_ai_rag_dev"
   DATABASE_ID: "zeos-rag"
+  # Bedrock inference profile (parameterized so model upgrades don't require template changes)
+  BEDROCK_SOURCE_INFERENCE_PROFILE_ID: "eu.anthropic.claude-sonnet-4-20250514-v1:0"
+  BEDROCK_INFERENCE_PROFILE_SUFFIX: "claude-sonnet-4"
 
 stg_vars: &STG_ENV
   CLUSTER_ID: "zfs-test"
