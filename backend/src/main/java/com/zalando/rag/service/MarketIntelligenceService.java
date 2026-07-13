@@ -2,8 +2,8 @@ package com.zalando.rag.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zalando.rag.dto.marketintelligence.BrandDto;
-import com.zalando.rag.dto.marketintelligence.NewsCategoriesDto;
 import com.zalando.rag.dto.marketintelligence.NarrativeDto;
+import com.zalando.rag.dto.marketintelligence.NewsCategoriesDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -35,18 +35,26 @@ public class MarketIntelligenceService {
       """;
 
   public NarrativeDto generateNarrative(BrandDto brand) {
-    String marketsStr = brand.getMarkets() != null
-        ? brand.getMarkets().stream().map(m -> m.getCountry()).reduce((a, b) -> a + ", " + b).orElse("EU")
-        : "EU";
+    String marketsStr =
+        brand.getMarkets() != null
+            ? brand.getMarkets().stream()
+                .map(m -> m.getCountry())
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("EU")
+            : "EU";
 
-    String volumeMixStr = brand.getVolumeMix() != null
-        ? String.format("PPB %d units, Marketplaces %d units, Own.com %d units",
-            brand.getVolumeMix().getPpb(),
-            brand.getVolumeMix().getMarketplaces(),
-            brand.getVolumeMix().getOwnCom())
-        : "unknown";
+    String volumeMixStr =
+        brand.getVolumeMix() != null
+            ? String.format(
+                "PPB %d units, Marketplaces %d units, Own.com %d units",
+                brand.getVolumeMix().getPpb(),
+                brand.getVolumeMix().getMarketplaces(),
+                brand.getVolumeMix().getOwnCom())
+            : "unknown";
 
-    String userPrompt = String.format("""
+    String userPrompt =
+        String.format(
+            """
         Generate a sales narrative for %s.
 
         Brand context:
@@ -74,42 +82,49 @@ public class MarketIntelligenceService {
 
         Provide exactly 3 hooks, 2 watchouts, 2 lead-with products, 3 openers. Be specific to this brand's situation.
         """,
-        brand.getName(),
-        brand.getParentCompany(),
-        brand.getHq(),
-        (long) (brand.getOnlineRevenue() / 1_000_000),
-        brand.getLogistics(),
-        brand.getThreePl() != null ? " (" + brand.getThreePl() + ")" : "",
-        brand.getWarehouseLocation() != null ? brand.getWarehouseLocation() : "unknown",
-        brand.getSegment(),
-        brand.getPrioritySegment(),
-        marketsStr,
-        volumeMixStr,
-        brand.getExistingOrPotential()
-    );
+            brand.getName(),
+            brand.getParentCompany(),
+            brand.getHq(),
+            (long) (brand.getOnlineRevenue() / 1_000_000),
+            brand.getLogistics(),
+            brand.getThreePl() != null ? " (" + brand.getThreePl() + ")" : "",
+            brand.getWarehouseLocation() != null ? brand.getWarehouseLocation() : "unknown",
+            brand.getSegment(),
+            brand.getPrioritySegment(),
+            marketsStr,
+            volumeMixStr,
+            brand.getExistingOrPotential());
 
-    String response = ChatClient.builder(chatModel)
-        .defaultSystem(NARRATIVE_SYSTEM_PROMPT)
-        .build()
-        .prompt()
-        .user(userPrompt)
-        .call()
-        .content();
+    String response =
+        ChatClient.builder(chatModel)
+            .defaultSystem(NARRATIVE_SYSTEM_PROMPT)
+            .build()
+            .prompt()
+            .user(userPrompt)
+            .call()
+            .content();
 
     try {
       return objectMapper.readValue(extractJson(response), NarrativeDto.class);
     } catch (Exception e) {
-      log.error("Failed to parse narrative response for brand {}: {}", brand.getName(), e.getMessage());
+      log.error(
+          "Failed to parse narrative response for brand {}: {}", brand.getName(), e.getMessage());
       throw new RuntimeException("Failed to parse narrative response", e);
     }
   }
 
   public NewsCategoriesDto generateNews(BrandDto brand) {
-    String marketsStr = brand.getMarkets() != null
-        ? brand.getMarkets().stream().map(m -> m.getCountry()).reduce((a, b) -> a + ", " + b).orElse("EU")
-        : "EU";
+    String marketsStr =
+        brand.getMarkets() != null
+            ? brand.getMarkets().stream()
+                .map(m -> m.getCountry())
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("EU")
+            : "EU";
 
-    String userPrompt = String.format("""
+    String userPrompt =
+        String.format(
+            """
         You are a market intelligence analyst. Using your training knowledge, provide detailed intelligence signals for %s and its parent company %s.
 
         Brand context:
@@ -138,25 +153,25 @@ public class MarketIntelligenceService {
           "managementChanges": [{ "text": "...", "date": "", "source": "" }]
         }
         """,
-        brand.getName(),
-        brand.getParentCompany(),
-        brand.getHq(),
-        (long) (brand.getOnlineRevenue() / 1_000_000),
-        brand.getLogistics(),
-        brand.getThreePl() != null ? " via " + brand.getThreePl() : "",
-        marketsStr,
-        brand.getSegment(),
-        brand.getName(),
-        brand.getParentCompany()
-    );
+            brand.getName(),
+            brand.getParentCompany(),
+            brand.getHq(),
+            (long) (brand.getOnlineRevenue() / 1_000_000),
+            brand.getLogistics(),
+            brand.getThreePl() != null ? " via " + brand.getThreePl() : "",
+            marketsStr,
+            brand.getSegment(),
+            brand.getName(),
+            brand.getParentCompany());
 
-    String response = ChatClient.builder(chatModel)
-        .defaultSystem(NEWS_SYSTEM_PROMPT)
-        .build()
-        .prompt()
-        .user(userPrompt)
-        .call()
-        .content();
+    String response =
+        ChatClient.builder(chatModel)
+            .defaultSystem(NEWS_SYSTEM_PROMPT)
+            .build()
+            .prompt()
+            .user(userPrompt)
+            .call()
+            .content();
 
     try {
       return objectMapper.readValue(extractJson(response), NewsCategoriesDto.class);

@@ -1,8 +1,8 @@
 package com.zalando.rag.controller;
 
 import com.zalando.rag.dto.marketintelligence.BrandDto;
-import com.zalando.rag.dto.marketintelligence.NewsCategoriesDto;
 import com.zalando.rag.dto.marketintelligence.NarrativeDto;
+import com.zalando.rag.dto.marketintelligence.NewsCategoriesDto;
 import com.zalando.rag.service.MarketIntelligenceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
