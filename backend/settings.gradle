@@ -1,5 +1,1 @@
 rootProject.name = 'zeos-rag'
-
-// Include the presto-tools library module from the sibling directory
-include ':presto-tools'
-project(':presto-tools').projectDir = new File(rootDir, '../presto-tools')
