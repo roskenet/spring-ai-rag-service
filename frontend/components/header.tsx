@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Sun, Moon } from "lucide-react"
 import { useState, useEffect } from "react"
+import { TokenPanel } from "./token-panel"
 
 export function Header() {
   const pathname = usePathname()
@@ -59,15 +60,18 @@ export function Header() {
             ))}
           </div>
 
-          {mounted && (
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg border border-border hover:bg-muted/50 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {mounted && <TokenPanel />}
+            {mounted && (
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+            )}
+          </div>
         </div>
       </nav>
     </header>

@@ -10,6 +10,15 @@ spring:
       - org.springframework.ai.model.bedrock.converse.autoconfigure.BedrockConverseProxyChatAutoConfiguration
       - org.springframework.ai.model.bedrock.titan.autoconfigure.BedrockTitanEmbeddingAutoConfiguration
       - org.springframework.ai.model.bedrock.cohere.autoconfigure.BedrockCohereEmbeddingAutoConfiguration
+      # Exclude Spring Security in tests — no live JWKS endpoint available
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://identity.zalando.com/.well-known/jwk_uris
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb

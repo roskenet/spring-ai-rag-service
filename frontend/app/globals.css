@@ -27,3 +27,207 @@ html {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
+
+/* ===== Market Intelligence Portal styles (mi- prefix to avoid conflicts) ===== */
+
+.mi-screen {
+  --mi-bg: #F0EEF8;
+  --mi-surface: #FFFFFF;
+  --mi-surface-2: #E8E4F4;
+  --mi-surface-3: #D8D0EE;
+  --mi-ink: #0F0A1E;
+  --mi-ink-2: #2D2350;
+  --mi-muted: #6B5F8A;
+  --mi-muted-2: #9E95B8;
+  --mi-line: rgba(15, 10, 30, 0.08);
+  --mi-line-strong: rgba(15, 10, 30, 0.15);
+  --mi-accent: #7B5BDB;
+  --mi-accent-soft: #EDE8FA;
+  --mi-accent-ink: #4A2FA8;
+  --mi-good: oklch(0.55 0.13 150);
+  --mi-good-soft: oklch(0.94 0.05 150);
+  --mi-good-ink: oklch(0.32 0.10 150);
+  --mi-warn: oklch(0.72 0.14 70);
+  --mi-warn-soft: oklch(0.96 0.06 80);
+  --mi-warn-ink: oklch(0.45 0.13 60);
+  --mi-bad: oklch(0.58 0.16 30);
+  --mi-bad-soft: oklch(0.95 0.05 30);
+  --mi-bad-ink: oklch(0.42 0.14 30);
+  --mi-seg-ppb: #3B1FA8;
+  --mi-seg-mkt: #7B5BDB;
+  --mi-seg-own: #B89FEE;
+  --mi-font-sans: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mi-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mi-r-sm: 8px;
+  --mi-r: 12px;
+  --mi-r-lg: 16px;
+  --mi-r-xl: 22px;
+  --mi-shadow-1: 0 1px 0 rgba(15,10,30,0.04), 0 1px 2px rgba(15,10,30,0.06);
+  --mi-shadow-2: 0 6px 24px -8px rgba(15,10,30,0.12), 0 2px 4px rgba(15,10,30,0.06);
+
+  /* Fill the flex:1 parent provided by AppShell — do NOT use 100vh here */
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  background: var(--mi-bg);
+  color: var(--mi-ink);
+  font-family: var(--mi-font-sans);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.mi-tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+/* topbar */
+.mi-topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 24px; border-bottom: 1px solid var(--mi-line);
+  background: var(--mi-surface); flex-shrink: 0;
+}
+.mi-nav { display: flex; gap: 4px; margin-left: 24px; }
+.mi-nav a {
+  padding: 6px 10px; border-radius: 6px; font-size: 13.5px;
+  color: var(--mi-muted); text-decoration: none; cursor: pointer;
+}
+.mi-nav a.active { background: var(--mi-surface-2); color: var(--mi-ink); }
+.mi-search {
+  flex: 1; max-width: 340px; margin-left: auto;
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px; background: var(--mi-surface-2);
+  border-radius: 8px; font-size: 13px; color: var(--mi-muted);
+}
+.mi-search input {
+  border: none; background: transparent; outline: none;
+  font-family: var(--mi-font-sans); font-size: 13px; color: var(--mi-ink); width: 100%;
+}
+.mi-search input::placeholder { color: var(--mi-muted); }
+.mi-user {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, oklch(0.65 0.12 30), oklch(0.55 0.14 280));
+  color: white; display: grid; place-items: center;
+  font-size: 11px; font-weight: 600;
+}
+
+/* pills */
+.mi-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 12px; font-weight: 500; letter-spacing: -0.005em;
+  white-space: nowrap; border: 1px solid transparent;
+}
+.mi-pill.high { background: var(--mi-good-soft); color: var(--mi-good-ink); border-color: var(--mi-good-ink); }
+.mi-pill.med  { background: var(--mi-warn-soft); color: var(--mi-warn-ink); border-color: var(--mi-warn-ink); }
+.mi-pill.low  { background: var(--mi-bad-soft);  color: var(--mi-bad-ink);  border-color: var(--mi-bad-ink); }
+.mi-pill.neutral { background: var(--mi-surface-2); color: var(--mi-muted); }
+.mi-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.mi-cell-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 500; letter-spacing: -0.005em;
+  white-space: nowrap; background: var(--mi-surface-2);
+  color: var(--mi-ink-2); border: 1px solid var(--mi-line-strong);
+}
+
+/* monogram */
+.mi-mono {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: grid; place-items: center;
+  font-weight: 600; font-size: 13px; letter-spacing: -0.02em;
+  color: white; flex-shrink: 0;
+}
+.mi-mono.xl { width: 88px; height: 88px; border-radius: 20px; font-size: 32px; }
+
+/* table */
+.mi-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.mi-table thead th {
+  text-align: left; font-size: 11.5px; font-weight: 500;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--mi-ink-2);
+  padding: 12px 14px; border-bottom: 1px solid var(--mi-line-strong);
+  background: var(--mi-accent-soft); position: sticky; top: 0; z-index: 1;
+}
+.mi-table tbody td { padding: 14px; border-bottom: 1px solid var(--mi-line); vertical-align: middle; }
+.mi-table tbody tr { background: var(--mi-surface); cursor: pointer; transition: background 0.1s; }
+.mi-table tbody tr:hover { background: var(--mi-surface-2); }
+
+/* stacked bar */
+.mi-sbar { display: flex; width: 100%; height: 8px; border-radius: 4px; overflow: hidden; background: var(--mi-surface-3); }
+.mi-seg { height: 100%; transition: filter 0.15s; }
+.mi-sbar.lg { height: 12px; border-radius: 6px; }
+.mi-sbar-legend { display: flex; gap: 16px; font-size: 12px; color: var(--mi-muted); }
+
+/* cards */
+.mi-card { background: var(--mi-surface); border: 1px solid var(--mi-line); border-radius: var(--mi-r-lg); padding: 20px; }
+.mi-card-h { font-size: 11.5px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--mi-muted); margin: 0 0 14px; }
+
+/* buttons */
+.mi-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--mi-line); background: var(--mi-surface); color: var(--mi-ink);
+  cursor: pointer; font-family: inherit; transition: background 0.1s, border-color 0.1s;
+}
+.mi-btn:hover { background: var(--mi-surface-2); }
+.mi-btn.primary { background: var(--mi-accent); color: #ffffff; border-color: var(--mi-accent); font-weight: 600; }
+.mi-btn.primary:hover { background: #6A4AC8; border-color: #6A4AC8; }
+.mi-btn.ghost { border-color: transparent; background: transparent; color: var(--mi-muted); }
+.mi-btn.ghost:hover { background: var(--mi-surface-2); color: var(--mi-ink); }
+
+/* utility */
+.mi-row { display: flex; align-items: center; gap: 8px; }
+.mi-col { display: flex; flex-direction: column; gap: 8px; }
+.mi-hr { height: 1px; background: var(--mi-line); border: 0; margin: 0; }
+
+/* filter rail */
+.mi-filter-section-title {
+  font-size: 11.5px; color: var(--mi-muted); text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 8px; font-weight: 500;
+}
+.mi-filter-option {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 8px; border-radius: 6px; font-size: 13px; cursor: pointer;
+  color: var(--mi-ink-2);
+}
+.mi-filter-option:hover { background: var(--mi-surface-2); }
+.mi-filter-option.active { background: var(--mi-surface-2); color: var(--mi-ink); font-weight: 500; }
+.mi-filter-count { font-size: 11px; color: var(--mi-muted); font-family: var(--mi-font-mono); }
+
+/* tabs */
+.mi-tab-bar {
+  display: flex; gap: 2px; padding: 0 24px;
+  border-bottom: 1px solid var(--mi-line); background: var(--mi-surface); flex-shrink: 0;
+}
+.mi-tab-item {
+  padding: 12px 16px; font-size: 13.5px; font-weight: 500; color: var(--mi-muted);
+  cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.1s;
+}
+.mi-tab-item.active { color: var(--mi-ink); border-bottom-color: var(--mi-ink); }
+.mi-tab-item:hover:not(.active) { color: var(--mi-ink-2); }
+
+/* status bar */
+.mi-status-bar {
+  padding: 6px 20px; font-size: 11px; font-family: var(--mi-font-mono);
+  color: var(--mi-muted); background: var(--mi-surface); border-top: 1px solid var(--mi-line);
+  flex-shrink: 0;
+}
+
+/* sidebar */
+.mi-brand-sidebar {
+  width: 300px; flex-shrink: 0; background: var(--mi-surface);
+  border-right: 1px solid var(--mi-line); overflow-y: auto; padding: 24px 20px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+
+/* drawer */
+.mi-drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 40;
+}
+.mi-drawer {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 560px;
+  background: var(--mi-surface); border-left: 1px solid var(--mi-line);
+  z-index: 50; overflow-y: auto; padding: 28px;
+  box-shadow: var(--mi-shadow-2);
+}

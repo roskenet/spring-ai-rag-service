@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Box, Typography, Button, Card, CardContent, Avatar } from "@mui/material"
-import { Search, Upload, Settings } from "@mui/icons-material"
+import { Search, Upload, Settings, TrendingUp } from "@mui/icons-material"
 
 export default function Home() {
   return (
@@ -60,8 +60,21 @@ export default function Home() {
         </Box>
       </Box>
 
+      {/* App Access Buttons */}
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center', mt: 2 }}>
+        <Link href="/market-intelligence" style={{ textDecoration: 'none' }}>
+          <Button
+            variant="outlined"
+            size="large"
+            sx={{ px: 4, py: 1.5, borderColor: '#7B5BDB', color: '#7B5BDB', '&:hover': { borderColor: '#6A4AC8', background: 'rgba(123,91,219,0.05)' } }}
+          >
+            Market Intelligence
+          </Button>
+        </Link>
+      </Box>
+
       {/* Features Section */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3, mt: 8 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' }, gap: 3, mt: 8 }}>
         <Card
           sx={{
             height: '100%',
@@ -154,6 +167,40 @@ export default function Home() {
             </Typography>
           </CardContent>
         </Card>
+
+        <Link href="/market-intelligence" style={{ textDecoration: 'none' }}>
+          <Card
+            sx={{
+              height: '100%',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+              borderColor: 'rgba(123, 91, 219, 0.3)',
+              '&:hover': {
+                borderColor: '#7B5BDB',
+                boxShadow: '0 4px 20px rgba(123, 91, 219, 0.2)',
+              },
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Avatar
+                sx={{
+                  width: 56,
+                  height: 56,
+                  mb: 2,
+                  background: 'linear-gradient(45deg, rgba(123, 91, 219, 0.2), rgba(74, 47, 168, 0.2))',
+                }}
+              >
+                <TrendingUp sx={{ color: '#7B5BDB' }} />
+              </Avatar>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                Market Intelligence
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                AI-powered sales intelligence for European fashion and retail brands
+              </Typography>
+            </CardContent>
+          </Card>
+        </Link>
       </Box>
     </Box>
   )

@@ -31,10 +31,8 @@ export function useTheme() {
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    setIsMounted(true)
     const isDarkMode = localStorage.getItem("theme") === "dark"
     setIsDark(isDarkMode)
     if (isDarkMode) {
@@ -53,18 +51,9 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Prevent hydration mismatch by not rendering until mounted
-  if (!isMounted) {
-    return (
-      <ThemeContext.Provider value={{ isDark: false, toggleTheme: () => {} }}>
-        <MuiThemeProvider theme={lightTheme}>
-          <CssBaseline />
-          {children}
-        </MuiThemeProvider>
-      </ThemeContext.Provider>
-    )
-  }
-
+  // Always render the same tree structure (light theme on server/first paint).
+  // isDark starts false so server and first client render both use lightTheme.
+  // The useEffect above applies the saved preference after hydration.
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme }}>
       <MuiThemeProvider theme={isDark ? darkTheme : lightTheme}>
@@ -84,10 +73,12 @@ function AppShell({ children }: { children: React.ReactNode }) {
     return false
   }
 
+  const isMI = pathname.startsWith('/market-intelligence')
+
   return (
-    <Box sx={{ minHeight: '100vh' }}>
+    <Box sx={isMI ? { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' } : { minHeight: '100vh' }}>
       {/* Header Navigation */}
-      <AppBar position="sticky" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <AppBar position="sticky" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
         <Container maxWidth="xl">
           <Toolbar sx={{ justifyContent: 'space-between' }}>
             {/* Logo */}
@@ -161,6 +152,19 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   Settings
                 </Typography>
               </Link>
+              <Link href="/market-intelligence" style={{ textDecoration: 'none' }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isActive("/market-intelligence") ? 'primary.main' : 'text.primary',
+                    fontWeight: isActive("/market-intelligence") ? 600 : 400,
+                    '&:hover': { color: 'primary.main' },
+                    transition: 'color 0.2s',
+                  }}
+                >
+                  Market Intel
+                </Typography>
+              </Link>
               <UserInfo />
               <ThemeToggle />
             </Box>
@@ -168,10 +172,16 @@ function AppShell({ children }: { children: React.ReactNode }) {
         </Container>
       </AppBar>
 
-      {/* Main Content */}
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        {children}
-      </Container>
+      {/* Main Content — market-intelligence uses its own full-screen layout */}
+      {isMI ? (
+        <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {children}
+        </Box>
+      ) : (
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          {children}
+        </Container>
+      )}
     </Box>
   )
 }
