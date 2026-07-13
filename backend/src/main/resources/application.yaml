@@ -8,12 +8,6 @@
 spring:
   application:
     name: spring-ai-rag-service
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: https://identity.zalando.com/.well-known/jwk_uris
-          issuer-uri: https://identity.zalando.com
   autoconfigure:
     exclude:
       # Exclude Cohere embedding (we want Titan only)
@@ -157,21 +151,6 @@ rag:
 
 server:
   port: 8080
-
-# Presto/Trino datalake integration
-presto:
-  enabled: ${PRESTO_ENABLED:false}
-  url: ${PRESTO_URL:jdbc:trino://interactive.starburst.zalando.net:443/hive}
-  user: ${PRESTO_USER:}
-  default-catalog: hive
-  default-schema: default
-  connection-timeout-seconds: 30
-  query-timeout-seconds: 300
-  # Sub claims (LDAP uids) allowed to trigger datalake queries via the agent loop.
-  # Must match the 'sub' claim in the Zalando JWT. Changes go through PR review.
-  access:
-    allowed-users:
-      - nashukla
 
 # Chat memory optimization configuration
 chat:
