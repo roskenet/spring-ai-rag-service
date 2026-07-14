@@ -1,4 +1,5 @@
 'use client'
+import { useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 import Image from 'next/image'
 
@@ -7,7 +8,23 @@ type Props = {
   onSearch?: (v: string) => void
 }
 
+function useUserInitials(): string {
+  const [initials, setInitials] = useState('')
+  useEffect(() => {
+    fetch('/api/auth/user-info')
+      .then(r => r.json())
+      .then(data => {
+        const display: string = data.name || data.uid || data.email || ''
+        setInitials(display.slice(0, 2).toUpperCase())
+      })
+      .catch(() => {})
+  }, [])
+  return initials
+}
+
 export default function TopBar({ search = '', onSearch }: Props) {
+  const initials = useUserInitials()
+
   return (
     <header className="mi-topbar">
       <div className="mi-row" style={{ gap: 10 }}>
@@ -27,7 +44,7 @@ export default function TopBar({ search = '', onSearch }: Props) {
           onChange={e => onSearch?.(e.target.value)}
         />
       </div>
-      <div className="mi-user">SG</div>
+      {initials && <div className="mi-user">{initials}</div>}
     </header>
   )
 }
