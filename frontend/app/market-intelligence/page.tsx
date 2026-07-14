@@ -17,9 +17,15 @@ export default function MarketIntelligencePage() {
 
   useEffect(() => {
     fetch('/api/market-intelligence/brands')
-      .then(r => r.json())
-      .then(data => { setBrands(data); setLoading(false) })
-      .catch(() => setLoading(false))
+      .then(async r => {
+        const data = await r.json()
+        if (!r.ok) throw new Error(data?.error ?? `HTTP ${r.status}`)
+        if (!Array.isArray(data)) throw new Error('Expected brands array')
+        return data as Brand[]
+      })
+      .then(data => setBrands(data))
+      .catch(err => console.error('Failed to load brands:', err))
+      .finally(() => setLoading(false))
   }, [])
 
   const filtered = brands
