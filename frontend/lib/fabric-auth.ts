@@ -46,6 +46,18 @@ export function extractTokenFromFabricHeaders(request: NextRequest): string | nu
   return null;
 }
 
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const padded = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = Buffer.from(padded, 'base64').toString('utf-8');
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Extract user information from Fabric Gateway headers
  */
@@ -55,7 +67,7 @@ export function extractUserFromFabricHeaders(request: NextRequest): FabricUserIn
 
   let userInfo: FabricUserInfo | null = null;
 
-  // Try to extract from token info
+  // Try to extract from x-tokeninfo-forward
   if (tokenInfoHeader) {
     try {
       const tokenInfo: FabricTokenInfo = JSON.parse(tokenInfoHeader);
@@ -70,11 +82,40 @@ export function extractUserFromFabricHeaders(request: NextRequest): FabricUserIn
     }
   }
 
-  // Try to extract from user ID header
+  // Try to extract from x-uid-forward
   if (!userInfo && userIdHeader) {
-    userInfo = {
-      uid: userIdHeader,
-    };
+    userInfo = { uid: userIdHeader };
+  }
+
+  // Fall back: decode the Bearer JWT to get uid/sub/name from claims
+  if (!userInfo) {
+    const authHeader = request.headers.get('authorization');
+    const tokenHeader = request.headers.get('x-token-forward');
+    const raw = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : tokenHeader;
+    if (raw) {
+      const payload = decodeJwtPayload(raw);
+      if (payload) {
+        const uid =
+          (payload['uid'] as string) ||
+          (payload['sub'] as string) ||
+          (payload['preferred_username'] as string) ||
+          (payload['username'] as string) ||
+          (payload['email'] as string) ||
+          null;
+        const name =
+          (payload['name'] as string) ||
+          (payload['display_name'] as string) ||
+          (payload['given_name'] as string) ||
+          null;
+        const realm =
+          (payload['realm'] as string) ||
+          (payload['iss'] as string) ||
+          null;
+        if (uid) {
+          userInfo = { uid, ...(name ? { name } : {}), ...(realm ? { realm } : {}) };
+        }
+      }
+    }
   }
 
   return userInfo;

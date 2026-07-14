@@ -1,0 +1,50 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { Search } from 'lucide-react'
+import Image from 'next/image'
+
+type Props = {
+  search?: string
+  onSearch?: (v: string) => void
+}
+
+function useUserInitials(): string {
+  const [initials, setInitials] = useState('')
+  useEffect(() => {
+    fetch('/api/auth/user-info')
+      .then(r => r.json())
+      .then(data => {
+        const display: string = data.name || data.uid || data.email || ''
+        setInitials(display.slice(0, 2).toUpperCase())
+      })
+      .catch(() => {})
+  }, [])
+  return initials
+}
+
+export default function TopBar({ search = '', onSearch }: Props) {
+  const initials = useUserInitials()
+
+  return (
+    <header className="mi-topbar">
+      <div className="mi-row" style={{ gap: 10 }}>
+        <Image src="/zeos-logo.png" alt="ZEOS" width={28} height={28} style={{ objectFit: 'contain' }} />
+        <span style={{ fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', color: 'var(--mi-ink)' }}>ZEOS</span>
+        <span style={{ color: 'var(--mi-muted)', fontSize: 13, fontWeight: 400, marginLeft: 4 }}>Market Intelligence</span>
+      </div>
+      <nav className="mi-nav">
+        <a href="/market-intelligence" className="active" aria-current="page">Hunting List</a>
+      </nav>
+      <div className="mi-search">
+        <Search size={14} color="var(--mi-muted)" />
+        <input
+          aria-label="Search brands"
+          placeholder="Search brands…"
+          value={search}
+          onChange={e => onSearch?.(e.target.value)}
+        />
+      </div>
+      {initials && <div className="mi-user">{initials}</div>}
+    </header>
+  )
+}

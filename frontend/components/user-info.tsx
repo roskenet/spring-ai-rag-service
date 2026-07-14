@@ -9,16 +9,18 @@ interface UserInfo {
   realm?: string | null;
   authenticated: boolean;
   hasToken: boolean;
-  debug?: any;
+  debug?: Record<string, unknown>;
   error?: string;
 }
 
 export function UserInfo() {
   const [userInfo, setUserInfo] = useState<UserInfo>({ authenticated: false, hasToken: false });
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Fetch user info from a special endpoint that extracts Fabric Gateway headers
     fetch('/api/auth/user-info')
       .then(response => response.json())
@@ -33,6 +35,9 @@ export function UserInfo() {
         setLoading(false);
       });
   }, []);
+
+  // Return nothing on server and before mount — avoids hydration mismatch
+  if (!mounted) return null;
 
   if (loading) {
     return (
@@ -63,14 +68,17 @@ export function UserInfo() {
         onClick={() => setShowDebug(!showDebug)}
         title="Click to toggle debug info"
       >
-        {userInfo.uid?.charAt(0).toUpperCase() || '?'}
+        {(userInfo.name || userInfo.uid || userInfo.email)?.charAt(0).toUpperCase() || (userInfo.authenticated ? '✓' : '?')}
       </div>
 
       <div className="flex flex-col">
         <span className="text-sm font-medium text-gray-900">
-          {userInfo.name || userInfo.uid || 'Unknown User'}
+          {userInfo.name || userInfo.uid || (userInfo.authenticated ? 'Authenticated User' : 'Unknown User')}
         </span>
         <span className="text-xs text-gray-500">{getStatusText()}</span>
+        {userInfo.email && !userInfo.name && !userInfo.uid && (
+          <span className="text-xs text-gray-400">{userInfo.email}</span>
+        )}
         {userInfo.realm && (
           <span className="text-xs text-gray-400">{userInfo.realm}</span>
         )}

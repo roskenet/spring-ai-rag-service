@@ -1,5 +1,6 @@
 // API client for ZEOS Knowledge backend integration
-// Note: Authentication is handled by Fabric Gateway automatically
+import { getToken } from './token-store';
+
 const API_BASE_URL = '/api';
 
 // Types matching backend DTOs
@@ -97,9 +98,16 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
 
+    const extraHeaders: Record<string, string> = {};
+    const token = getToken();
+    if (token) {
+      extraHeaders['Authorization'] = `Bearer ${token}`;
+    }
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
+        ...extraHeaders,
         ...options.headers,
       },
       ...options,

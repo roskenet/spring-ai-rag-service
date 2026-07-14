@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
       // Always return info, even if not fully authenticated
       authenticated: isAuthenticated,
       uid: userInfo?.uid || null,
-      name: userInfo?.uid || null,
+      name: userInfo?.name || userInfo?.uid || null,
+      email: userInfo?.email || null,
       realm: userInfo?.realm || null,
       hasToken: !!token,
       timestamp: new Date().toISOString(),
