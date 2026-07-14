@@ -42,9 +42,17 @@ export default function BrandPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(brand),
     })
-      .then(r => r.json())
-      .then(data => { setNarrative(data); setNarrativeLoading(false) })
-      .catch(() => setNarrativeLoading(false))
+      .then(async r => {
+        const data = await r.json()
+        if (!r.ok) throw new Error(data?.error ?? `HTTP ${r.status}`)
+        return data as Narrative
+      })
+      .then(data => setNarrative(data))
+      .catch(err => {
+        console.error('Failed to load narrative:', err)
+        setNarrative(null)
+      })
+      .finally(() => setNarrativeLoading(false))
 
     setNewsLoading(true)
     fetch('/api/market-intelligence/news', {
@@ -52,9 +60,17 @@ export default function BrandPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(brand),
     })
-      .then(r => r.json())
-      .then(data => { setNews(data); setNewsLoading(false) })
-      .catch(() => setNewsLoading(false))
+      .then(async r => {
+        const data = await r.json()
+        if (!r.ok) throw new Error(data?.error ?? `HTTP ${r.status}`)
+        return data as NewsCategories
+      })
+      .then(data => setNews(data))
+      .catch(err => {
+        console.error('Failed to load news:', err)
+        setNews(null)
+      })
+      .finally(() => setNewsLoading(false))
   }, [brand?.id])
 
   if (!brand) {
