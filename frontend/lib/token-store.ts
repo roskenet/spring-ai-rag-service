@@ -8,7 +8,12 @@ const KEY = 'zeos_bearer_token';
 
 export function setToken(token: string): void {
   if (typeof window === 'undefined') return;
-  sessionStorage.setItem(KEY, token.trim());
+  const trimmed = token.trim();
+  if (!trimmed) {
+    sessionStorage.removeItem(KEY);
+    return;
+  }
+  sessionStorage.setItem(KEY, trimmed);
 }
 
 export function getToken(): string | null {
@@ -22,7 +27,8 @@ export function clearToken(): void {
 }
 
 export function hasToken(): boolean {
-  return getToken() !== null;
+  const token = getToken();
+  return !!token && token.trim().length > 0;
 }
 
 /** Returns token expiry as Date, or null if not parseable. */
