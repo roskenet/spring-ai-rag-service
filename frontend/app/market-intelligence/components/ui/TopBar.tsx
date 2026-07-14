@@ -16,11 +16,12 @@ export default function TopBar({ search = '', onSearch }: Props) {
         <span style={{ color: 'var(--mi-muted)', fontSize: 13, fontWeight: 400, marginLeft: 4 }}>Market Intelligence</span>
       </div>
       <nav className="mi-nav">
-        <a className="active">Hunting List</a>
+        <a href="/market-intelligence" className="active" aria-current="page">Hunting List</a>
       </nav>
       <div className="mi-search">
         <Search size={14} color="var(--mi-muted)" />
         <input
+          aria-label="Search brands"
           placeholder="Search brands…"
           value={search}
           onChange={e => onSearch?.(e.target.value)}
