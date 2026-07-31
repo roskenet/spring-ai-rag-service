@@ -35,20 +35,30 @@ command_exists() {
 check_prerequisites() {
     print_status "Checking prerequisites..."
 
-    if ! command_exists docker; then
-        print_error "Docker is not installed. Please install Docker first."
-        exit 1
-    fi
-
-    if ! command_exists docker-compose; then
-        if ! docker compose version >/dev/null 2>&1; then
-            print_error "Docker Compose is not installed. Please install Docker Compose first."
-            exit 1
+    if command_exists podman; then
+        print_status "Detected podman, using podman and podman-compose"
+        CONTAINER_CMD="podman"
+        if command_exists podman-compose; then
+            COMPOSE_CMD="podman-compose"
         else
-            COMPOSE_CMD="docker compose"
+            print_error "podman-compose is not installed. Please install podman-compose first."
+            exit 1
+        fi
+    elif command_exists docker; then
+        CONTAINER_CMD="docker"
+        if ! command_exists docker-compose; then
+            if ! docker compose version >/dev/null 2>&1; then
+                print_error "Docker Compose is not installed. Please install Docker Compose first."
+                exit 1
+            else
+                COMPOSE_CMD="docker compose"
+            fi
+        else
+            COMPOSE_CMD="docker-compose"
         fi
     else
-        COMPOSE_CMD="docker-compose"
+        print_error "Neither Docker nor Podman is installed. Please install one of them first."
+        exit 1
     fi
 
     print_success "Prerequisites check passed!"
@@ -200,18 +210,23 @@ cleanup() {
 
     # Ensure COMPOSE_CMD is set
     if [ -z "$COMPOSE_CMD" ]; then
-        if command_exists docker-compose; then
+        if command_exists podman-compose; then
+            COMPOSE_CMD="podman-compose"
+            CONTAINER_CMD="podman"
+        elif command_exists docker-compose; then
             COMPOSE_CMD="docker-compose"
+            CONTAINER_CMD="docker"
         elif docker compose version >/dev/null 2>&1; then
             COMPOSE_CMD="docker compose"
+            CONTAINER_CMD="docker"
         else
-            print_error "Neither docker-compose nor docker compose is available!"
+            print_error "Neither podman-compose, docker-compose nor docker compose is available!"
             exit 1
         fi
     fi
 
     $COMPOSE_CMD down -v
-    docker system prune -f
+    $CONTAINER_CMD system prune -f
     print_success "Cleanup completed!"
 }
 

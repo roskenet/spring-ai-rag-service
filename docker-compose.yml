@@ -18,7 +18,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro,Z
     command: postgres -c shared_preload_libraries=vector
     networks:
       - zeos-rag-network
@@ -42,7 +42,7 @@ services:
       - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      - ./backend/pgadmin-servers.json:/pgadmin4/servers.json
+      - ./backend/pgadmin-servers.json:/pgadmin4/servers.json:ro,Z
     depends_on:
       postgres:
         condition: service_healthy
@@ -72,6 +72,8 @@ services:
       - AWS_REGION=${AWS_REGION:-eu-central-1}
       # AWS credentials resolved automatically via default credentials chain
       # For local development: set AWS credentials via ~/.aws/credentials or aws configure
+    volumes:
+      - $HOME/.aws/credentials:/root/.aws/credentials:ro
     ports:
       - "8080:8080"
     depends_on:
