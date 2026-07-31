@@ -36,13 +36,11 @@ public class CorsFilter implements Filter {
     }
 
     response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    response.setHeader(
-        "Access-Control-Allow-Headers",
-        "Authorization, Content-Type, X-Flow-Id, X-TokenInfo-Forward");
+    response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
     response.setHeader("Access-Control-Max-Age", "3600");
     response.setHeader("Access-Control-Allow-Credentials", "false");
     // Expose headers that frontend might need
-    response.setHeader("Access-Control-Expose-Headers", "X-TokenInfo-Forward, Content-Type");
+    response.setHeader("Access-Control-Expose-Headers", "Content-Type");
 
     // Handle preflight requests
     if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
@@ -62,17 +60,6 @@ public class CorsFilter implements Filter {
     // Allow localhost for development
     if (origin.matches("https?://localhost(:\\d+)?")
         || origin.matches("https?://127\\.0\\.0\\.1(:\\d+)?")) {
-      return true;
-    }
-
-    // Allow zalan.do domains for staging/production
-    if (origin.matches("https://.*\\.zalan\\.do")
-        || origin.matches("https://.*\\.zfs-test\\.zalan\\.do")) {
-      return true;
-    }
-
-    // Allow specific development IP
-    if (origin.matches("https?://192\\.168\\.178\\.70(:\\d+)?")) {
       return true;
     }
 

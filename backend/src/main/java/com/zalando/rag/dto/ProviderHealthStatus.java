@@ -15,7 +15,7 @@ import lombok.Data;
 @Builder
 public class ProviderHealthStatus {
 
-  /** Currently active provider (e.g., "zllm", "bedrock") */
+  /** Currently active provider (e.g., "bedrock") */
   private String provider;
 
   /** Overall health status */

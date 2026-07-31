@@ -85,7 +85,7 @@ If you have Docker installed:
 ./run-local.sh start
 ```
 
-This starts PostgreSQL with pgvector, the Spring Boot backend, and a Next.js frontend. The script handles token management automatically if you have the `ztoken` CLI installed.
+This starts PostgreSQL with pgvector, the Spring Boot backend, and a Next.js frontend. The script validates your AWS credentials automatically if the AWS CLI is installed.
 
 Access points:
 - Frontend: http://localhost:3000
@@ -144,7 +144,7 @@ The frontend includes an analytics dashboard showing query performance, system h
 - Spring Boot 3.5.7 with Spring AI 1.0.3
 - Java 21 (for modern language features)
 - PostgreSQL with pgvector extension
-- ZLLM API (Zalando's OpenAI-compatible service)
+- AWS Bedrock (Anthropic Claude and Amazon Titan models)
 
 **Frontend**:
 - Next.js with TypeScript

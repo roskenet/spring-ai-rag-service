@@ -8,7 +8,7 @@ The Spring AI RAG Service provides REST endpoints for exploring document ingesti
 
 Before using the API, ensure you have:
 - Started the PostgreSQL database and pgAdmin using `docker-compose up -d`
-- Set the `ZTOKEN` environment variable with your Zalando ZLLM API token
+- Configured AWS credentials with access to Bedrock (via `~/.aws/credentials`, `aws configure`, or an IAM role)
 - Started the application with `./gradlew bootRun`
 
 **Database Access**: pgAdmin is available at `http://localhost:5050` for exploring the vector store and document metadata (credentials in docker-compose.yml).
@@ -165,7 +165,7 @@ curl -X POST http://localhost:9090/api/chat/ask \\
 ## Configuration
 
 ### Environment Variables
-- `ZTOKEN`: Zalando ZLLM API token (provides access to AWS Bedrock models)
+- `AWS_REGION`: AWS region for Bedrock access (defaults to eu-central-1)
 - `DB_USERNAME`: Database username (optional, defaults handled by docker-compose)
 - `DB_PASSWORD`: Database password (optional, defaults handled by docker-compose)
 - `SPRING_PROFILES_ACTIVE`: Active profile (dev, prod)

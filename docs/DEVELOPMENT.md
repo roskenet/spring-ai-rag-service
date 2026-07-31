@@ -8,7 +8,7 @@ This guide provides comprehensive information for engineers working with the Spr
 
 - **Java 21+**: Required for Spring Boot 3.5.x compatibility
 - **Docker & Docker Compose**: For PostgreSQL and pgAdmin setup
-- **Zalando Platform Access**: For ZLLM API integration
+- **AWS Credentials**: For Bedrock model access (Claude and Titan)
 
 ### Environment Setup
 
@@ -20,8 +20,8 @@ cd spring-ai-rag-service
 # Start PostgreSQL and pgAdmin with Docker Compose
 docker-compose up -d
 
-# Configure environment variables
-export ZTOKEN="your-zalando-zllm-token"
+# Configure AWS credentials (via ~/.aws/credentials, 'aws configure', or an IAM role)
+export AWS_REGION="eu-central-1"
 
 # Build and run the application
 ./gradlew bootRun
@@ -307,10 +307,10 @@ LIMIT 5;
 - **Debug**: Check pgvector extension installation
 - **Solution**: Ensure Docker Compose started properly
 
-#### 3. ZLLM API Issues
+#### 3. AWS Bedrock Issues
 - **Symptom**: Chat responses fail
-- **Debug**: Verify ZTOKEN environment variable
-- **Solution**: Check token expiration and permissions
+- **Debug**: Verify AWS credentials and region are configured
+- **Solution**: Check IAM permissions for the Bedrock models in use
 
 ### Logging Configuration
 

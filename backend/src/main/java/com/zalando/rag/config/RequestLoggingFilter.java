@@ -37,12 +37,10 @@ public class RequestLoggingFilter implements Filter {
 
     // Log specific headers we care about
     String authHeader = request.getHeader("Authorization");
-    String tokenInfoHeader = request.getHeader("X-TokenInfo-Forward");
     String userAgent = request.getHeader("User-Agent");
     String contentType = request.getHeader("Content-Type");
 
     log.debug("Authorization: {}", authHeader != null ? maskToken(authHeader) : "null");
-    log.debug("X-TokenInfo-Forward: {}", tokenInfoHeader != null ? tokenInfoHeader : "null");
     log.debug("Content-Type: {}", contentType != null ? contentType : "null");
     log.debug("User-Agent: {}", userAgent != null ? userAgent : "null");
 

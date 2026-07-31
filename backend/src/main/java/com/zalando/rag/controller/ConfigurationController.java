@@ -175,7 +175,7 @@ public class ConfigurationController {
   public ResponseEntity<Map<String, Object>> getActiveProvider() {
     try {
       var activeProvider = ragProviderProperties.getProvider();
-      var providerConfig = getProviderConfig(activeProvider);
+      var providerConfig = ragProviderProperties.getProviders().getBedrock();
 
       var response =
           Map.of(
@@ -192,16 +192,6 @@ public class ConfigurationController {
     } catch (Exception e) {
       log.error("Error retrieving active provider information", e);
       return ResponseEntity.internalServerError().build();
-    }
-  }
-
-  private RagProviderProperties.ProviderConfig getProviderConfig(String provider) {
-    switch (provider.toLowerCase()) {
-      case "bedrock":
-        return ragProviderProperties.getProviders().getBedrock();
-      case "zllm":
-      default:
-        return ragProviderProperties.getProviders().getZllm();
     }
   }
 }

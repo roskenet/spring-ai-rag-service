@@ -3,23 +3,19 @@ package com.zalando.rag.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/**
- * Configuration properties for RAG provider settings. Supports dual provider architecture with zLLM
- * and AWS Bedrock.
- */
+/** Configuration properties for RAG provider settings. Uses AWS Bedrock exclusively. */
 @ConfigurationProperties(prefix = "rag")
 @Data
 public class RagProviderProperties {
 
-  /** Currently active provider: 'zllm' or 'bedrock' */
-  private String provider = "zllm"; // Default to existing
+  /** Currently active provider: 'bedrock' */
+  private String provider = "bedrock";
 
   /** Provider-specific configurations */
   private Providers providers = new Providers();
 
   @Data
   public static class Providers {
-    private ProviderConfig zllm = new ProviderConfig();
     private ProviderConfig bedrock = new ProviderConfig();
   }
 

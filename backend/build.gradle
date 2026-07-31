@@ -1,6 +1,4 @@
 import org.springframework.boot.gradle.tasks.run.BootRun
-import com.google.cloud.tools.jib.gradle.JibTask
-import nu.studer.gradle.credentials.domain.CredentialsContainer
 
 plugins {
     id 'java'
@@ -8,23 +6,11 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.diffplug.spotless' version '7.0.2'
     id 'com.google.cloud.tools.jib' version '3.4.5'
-    id 'com.ryandens.javaagent-jib' version '0.4.2'
-    id 'nu.studer.credentials' version '3.0'
 }
 
 group = 'com.zalando'
 version = '0.0.1-SNAPSHOT'
 description = 'Spring AI RAG Learning Platform'
-
-// Apply credentials plugin explicitly (required for CDP)
-apply plugin: 'nu.studer.credentials'
-
-// CDP environment detection
-def runningLocally = System.getenv("CDP_BUILD_VERSION") == null
-
-// Simple credential access - let the credentials plugin handle it automatically
-def mavenUser = project.findProperty("zalandoUsername") as String
-def mavenPassword = runningLocally ? project.findProperty("zalandoPassword") as String : null
 
 java {
     toolchain {
@@ -41,31 +27,11 @@ configurations {
 repositories {
     mavenLocal()
     mavenCentral()
-    // Only add Zalando repositories if credentials are available
-    if (runningLocally && mavenUser && mavenPassword) {
-        maven {
-            name = "zalando-releases"
-            url = "https://maven.zalando.net/repository/releases"
-            credentials {
-                username = mavenUser
-                password = mavenPassword
-            }
-        }
-        maven {
-            name = "zalando-snapshots"
-            url = "https://maven.zalando.net/content/repositories/snapshots/"
-            credentials {
-                username = mavenUser
-                password = mavenPassword
-            }
-        }
-    }
 }
 
 ext {
     set('springAiVersion', "1.1.4")
-    set('observabilitySdkVersion', "3.1.13")
-    set('baseImage', "container-registry.zalando.net/library/eclipse-temurin-21-jdk:latest")
+    set('baseImage', "docker.io/library/eclipse-temurin:21-jdk")
 }
 
 dependencies {
@@ -88,9 +54,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    // Java agent for observability
-    javaagent "org.zalando.observability:observability-sdk-javaagent:${observabilitySdkVersion}"
 }
 
 dependencyManagement {
@@ -149,25 +112,6 @@ spotless {
 // JIB CONFIGURATION FOR DOCKER
 // ============================================================================
 
-def jibAgentsDirectory = layout.buildDirectory.dir("jib-agents")
-def agentFileName = "observability-sdk-javaagent.jar"
-
-tasks.register('copyJavaAgent', Copy) {
-    from(configurations.javaagent)
-    into(jibAgentsDirectory)
-    rename { _ -> agentFileName }
-}
-
-tasks.withType(JibTask) {
-    dependsOn('copyJavaAgent')
-}
-
-// hack to make sure the java agent is copied when importing the project into the IDE
-gradle.projectsEvaluated {
-    tasks.findByName("prepareKotlinBuildScriptModel")?.finalizedBy("copyJavaAgent")
-    tasks.findByName("clean")?.finalizedBy("cleanCopyJavaAgent")
-}
-
 tasks.bootJar {
     archiveBaseName.set("zeos-rag-backend")
     archiveVersion.set("1.0.0")
@@ -188,16 +132,8 @@ jib {
             }
         }
     }
-    extraDirectories {
-        paths {
-            path {
-                setFrom(file(jibAgentsDirectory))
-            }
-        }
-    }
     container {
         jvmFlags = [
-            "-javaagent:/${agentFileName}",
             "-XX:MaxRAMPercentage=75",
             "-XX:InitialRAMPercentage=75",
             "-Xlog:gc",

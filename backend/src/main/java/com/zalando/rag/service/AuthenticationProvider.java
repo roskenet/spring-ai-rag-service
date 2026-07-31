@@ -5,8 +5,8 @@ import java.util.Map;
 /**
  * Abstraction for different LLM provider authentication methods.
  *
- * <p>Supports various authentication approaches: - JWT tokens (zLLM) - AWS API keys (Bedrock) - AWS
- * service accounts (Bedrock in K8s) - OAuth flows
+ * <p>Supports various authentication approaches: - AWS API keys (Bedrock) - AWS service accounts
+ * (Bedrock in K8s)
  */
 public interface AuthenticationProvider {
 
@@ -20,7 +20,7 @@ public interface AuthenticationProvider {
   /**
    * Gets the provider type identifier.
    *
-   * @return provider type (e.g., "zllm", "bedrock")
+   * @return provider type (e.g., "bedrock")
    */
   String getProviderType();
 

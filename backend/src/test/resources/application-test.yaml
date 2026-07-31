@@ -18,11 +18,6 @@ spring:
       ddl-auto: create-drop
     show-sql: false
 
-# In tests we don't require token from header
-rag:
-  token:
-    require-header-token: false
-
 logging:
   level:
     com.zalando.rag: DEBUG

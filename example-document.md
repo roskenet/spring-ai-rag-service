@@ -59,12 +59,12 @@ Retrieval-Augmented Generation (RAG) is a powerful AI technique that combines:
 
 1. Java 21 or higher
 2. PostgreSQL with PGVector extension
-3. OpenAI API access (or compatible endpoint)
+3. AWS account with Bedrock access
 
 ### Quick Setup
 
 1. Clone the repository
-2. Set environment variables (ZTOKEN, DB_USERNAME, DB_PASSWORD)
+2. Configure AWS credentials and set environment variables (AWS_REGION, DB_USERNAME, DB_PASSWORD)
 3. Start PostgreSQL with Docker: `docker-compose up -d postgres`
 4. Run the application: `./gradlew bootRun --args='--spring.profiles.active=dev'`
 

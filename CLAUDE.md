@@ -13,7 +13,7 @@ This is a RAG (Retrieval-Augmented Generation) platform built with Spring Boot 3
 - **Controllers**: Handle REST API endpoints (`/api/chat`, `/api/documents`, `/api/analytics`, `/api/config`)
 - **Services**: Core business logic including `RagService`, `DocumentIngestionService`, and multiple chunking strategies
 - **Entities**: JPA entities for documents, metrics, and configuration
-- **Configuration**: Spring AI integration with OpenAI-compatible ZLLM API
+- **Configuration**: Spring AI integration with AWS Bedrock
 
 **Chunking System**: The core innovation is the pluggable chunking strategy system:
 - `ChunkingStrategy` interface with implementations for different document types
@@ -102,7 +102,7 @@ npm run lint
 ## Key Configuration
 
 **Environment Variables**:
-- `ZTOKEN`: Required for ZLLM API access (Zalando's OpenAI-compatible service)
+- `AWS_REGION`: AWS region for Bedrock access (defaults to eu-central-1); credentials resolved via the AWS default credentials chain
 - `DB_USERNAME/DB_PASSWORD`: Database credentials (defaults to postgres/postgres)
 - `SPRING_PROFILES_ACTIVE`: Environment profile (dev/docker/prod)
 
@@ -178,7 +178,7 @@ curl -X POST http://localhost:8080/api/chat/ask \
 
 **Build Pipeline**:
 - Spotless enforces Google Java Format
-- JIB handles containerization with Java agents
+- JIB handles containerization
 - Flyway manages database migrations
 
 **Monitoring**:

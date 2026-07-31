@@ -1,5 +1,5 @@
 # Use the official Eclipse Temurin JDK 21 runtime image
-FROM container-registry.zalando.net/library/eclipse-temurin-21-jdk:latest
+FROM docker.io/library/eclipse-temurin:21-jdk
 
 # Set working directory
 WORKDIR /app

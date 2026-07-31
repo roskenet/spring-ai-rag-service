@@ -54,7 +54,7 @@ The service will start on `http://localhost:9090`
 Set the following environment variables:
 
 ```bash
-export ZTOKEN=your_openai_api_token
+export AWS_REGION=eu-central-1
 export DB_USERNAME=postgres
 export DB_PASSWORD=postgres
 ```
