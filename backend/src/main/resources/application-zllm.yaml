@@ -8,7 +8,7 @@ spring:
       - org.springframework.ai.model.bedrock.cohere.autoconfigure.BedrockCohereEmbeddingAutoConfiguration
   ai:
     openai:
-      base-url: https://zllm.data.zalan.do/v1
+      base-url: https://zllm.data.zalan.do
       api-key: ${ZTOKEN}
       chat:
         options:

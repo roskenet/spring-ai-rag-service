@@ -213,8 +213,38 @@ Some areas we're considering:
 **RAG Architecture**:
 - [pgvector Performance Guide](https://github.com/pgvector/pgvector#performance)
 
+## Start locally
+
+Create a db:
+
+```
+docker run -d \
+  --name cep-rag-postgres \
+  -p 5432:5432 \
+  -e POSTGRES_DB=spring_ai_rag_dev \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -v postgres_data:/var/lib/postgresql/data \
+  -v "$(pwd)/backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql" \
+  pgvector/pgvector:pg16 \
+  postgres -c shared_preload_libraries=vector
+  ```
+
+Start the backend:
+
+```shell
+ZTOKEN=$(ztoken) SPRING_PROFILES_ACTIVE=zllm ./gradlew bootRun
+```
+
+Start the frontend:
+```shell
+npm run dev
+```
+
 ---
 
 This project demonstrates practical RAG implementation patterns within familiar Java tooling. It's designed for learning and experimentation, with enough production considerations to be useful as a foundation for real applications.
 
 The goal is to help Java teams understand modern AI integration without requiring a complete shift to Python-based tooling. Extend it, modify it, and adapt it to your specific use cases.
+
+
