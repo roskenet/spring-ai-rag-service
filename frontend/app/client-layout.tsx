@@ -145,7 +145,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                     letterSpacing: '-0.5px',
                   }}
                 >
-                  ZEOS Knowledge
+                  zKnowledge
                 </Typography>
               </Box>
             </Link>

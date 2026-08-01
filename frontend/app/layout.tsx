@@ -5,7 +5,7 @@ import { ClientLayout } from "./client-layout"
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter"
 
 export const metadata: Metadata = {
-  title: "ZEOS Knowledge - Intelligent Document Search",
+  title: "zKnowledge - Intelligent Document Search",
   description: "Advanced RAG platform for intelligent document search and knowledge discovery",
 }
 
