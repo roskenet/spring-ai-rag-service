@@ -6,7 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { useState, useEffect, createContext, useContext } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ThemeProvider as MuiThemeProvider, CssBaseline, AppBar, Toolbar, Box, Typography, Container } from "@mui/material"
+import { ThemeProvider as MuiThemeProvider, CssBaseline, AppBar, Toolbar, Box, Typography, Container, Button, useTheme as useMuiTheme } from "@mui/material"
 import { lightTheme, darkTheme } from "@/lib/mui-theme"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { UserInfo } from "@/components/user-info"
@@ -66,6 +66,14 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const muiTheme = useMuiTheme()
+
+  const navItems = [
+    { href: '/chat', label: 'Chat' },
+    { href: '/knowledge-base', label: 'Knowledge Base' },
+    { href: '/analytics', label: 'Analytics' },
+    { href: '/config', label: 'Settings' },
+  ]
 
   const isActive = (path: string) => {
     if (path === "/" && pathname === "/") return true
@@ -73,98 +81,92 @@ function AppShell({ children }: { children: React.ReactNode }) {
     return false
   }
 
-  const isMI = pathname.startsWith('/market-intelligence')
+  const NavLink = ({ href, label }: { href: string; label: string }) => (
+    <Button
+      component={Link}
+      href={href}
+      variant="text"
+      size="small"
+      sx={{
+        color: isActive(href) ? 'common.white' : 'inherit',
+        fontWeight: isActive(href) ? 600 : 500,
+        backgroundColor: isActive(href) ? 'action.hover' : 'transparent',
+        '&:hover': {
+          backgroundColor: isActive(href) ? 'action.selected' : 'action.hover',
+          color: 'common.white',
+        },
+        transition: muiTheme.transitions.create(['background-color', 'color'], {
+          duration: muiTheme.transitions.duration.shorter,
+        }),
+        textTransform: 'none',
+        fontSize: '0.9375rem',
+      }}
+    >
+      {label}
+    </Button>
+  )
 
   return (
-    <Box sx={isMI ? { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' } : { minHeight: '100vh' }}>
+    <Box sx={{ minHeight: '100vh' }}>
       {/* Header Navigation */}
-      <AppBar position="sticky" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
-        <Container maxWidth="xl">
-          <Toolbar sx={{ justifyContent: 'space-between' }}>
+      <AppBar position="sticky" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Container maxWidth="lg">
+          <Toolbar disableGutters sx={{ justifyContent: 'space-between', gap: 3, minHeight: 64 }}>
             {/* Logo */}
             <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                component="span"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  flexShrink: 0,
+                  transition: 'opacity 0.2s',
+                  '&:hover': {
+                    opacity: 0.8,
+                  },
+                }}
+              >
                 <Box
                   sx={{
-                    width: 32,
-                    height: 32,
+                    width: 36,
+                    height: 36,
                     background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
                     borderRadius: 1,
+                    flexShrink: 0,
                   }}
                 />
-                <Typography variant="h6" component="span" sx={{ fontWeight: 700 }}>
+                <Typography
+                  variant="h6"
+                  component="span"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '1.25rem',
+                    letterSpacing: '-0.5px',
+                  }}
+                >
                   ZEOS Knowledge
                 </Typography>
               </Box>
             </Link>
 
             {/* Navigation Links */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Link href="/chat" style={{ textDecoration: 'none' }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: isActive("/chat") ? 'primary.main' : 'text.primary',
-                    fontWeight: isActive("/chat") ? 600 : 400,
-                    '&:hover': { color: 'primary.main' },
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  Chat
-                </Typography>
-              </Link>
-              <Link href="/knowledge-base" style={{ textDecoration: 'none' }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: isActive("/knowledge-base") ? 'primary.main' : 'text.primary',
-                    fontWeight: isActive("/knowledge-base") ? 600 : 400,
-                    '&:hover': { color: 'primary.main' },
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  Knowledge Base
-                </Typography>
-              </Link>
-              <Link href="/analytics" style={{ textDecoration: 'none' }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: isActive("/analytics") ? 'primary.main' : 'text.primary',
-                    fontWeight: isActive("/analytics") ? 600 : 400,
-                    '&:hover': { color: 'primary.main' },
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  Analytics
-                </Typography>
-              </Link>
-              <Link href="/config" style={{ textDecoration: 'none' }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: isActive("/config") ? 'primary.main' : 'text.primary',
-                    fontWeight: isActive("/config") ? 600 : 400,
-                    '&:hover': { color: 'primary.main' },
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  Settings
-                </Typography>
-              </Link>
-              <Link href="/market-intelligence" style={{ textDecoration: 'none' }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: isActive("/market-intelligence") ? 'primary.main' : 'text.primary',
-                    fontWeight: isActive("/market-intelligence") ? 600 : 400,
-                    '&:hover': { color: 'primary.main' },
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  Market Intel
-                </Typography>
-              </Link>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+                flex: 1,
+                justifyContent: 'center',
+              }}
+            >
+              {navItems.map((item) => (
+                <NavLink key={item.href} href={item.href} label={item.label} />
+              ))}
+            </Box>
+
+            {/* Right Actions */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
               <UserInfo />
               <ThemeToggle />
             </Box>
@@ -172,16 +174,10 @@ function AppShell({ children }: { children: React.ReactNode }) {
         </Container>
       </AppBar>
 
-      {/* Main Content — market-intelligence uses its own full-screen layout */}
-      {isMI ? (
-        <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          {children}
-        </Box>
-      ) : (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-          {children}
-        </Container>
-      )}
+      {/* Main Content */}
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        {children}
+      </Container>
     </Box>
   )
 }
