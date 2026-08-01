@@ -59,7 +59,7 @@ export interface RagConfiguration {
 }
 
 export interface DocumentDto {
-  id: number;
+  id?: number;
   filename: string;
   title: string;
   fileSize: number;
@@ -112,6 +112,13 @@ class ApiClient {
       },
       ...options,
     };
+
+    // If it's a DELETE request, we don't need Content-Type: application/json
+    // some proxies/backends might be sensitive to this if no body is provided
+    if (options.method === 'DELETE' && config.headers) {
+      const headers = config.headers as Record<string, string>;
+      delete headers['Content-Type'];
+    }
 
     try {
       const response = await fetch(url, config);
@@ -179,8 +186,9 @@ class ApiClient {
     return this.request<DocumentDto[]>('/documents');
   }
 
-  async deleteDocument(id: number): Promise<void> {
-    if (!id) {
+  async deleteDocument(id: number | undefined): Promise<void> {
+    console.log(`[ApiClient] Deleting document with id: ${id}`);
+    if (id === undefined || id === null || isNaN(id)) {
       throw new Error(`Cannot delete document: invalid id "${id}"`);
     }
     return this.request<void>(`/documents/${id}`, {

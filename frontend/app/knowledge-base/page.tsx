@@ -24,7 +24,7 @@ interface DocumentMetadata {
 }
 
 interface Document {
-  id: number
+  id?: number
   filename: string
   title: string
   fileSize: number
@@ -165,9 +165,10 @@ export default function KnowledgeBasePage() {
     setSelectedFiles([]);
   };
 
-  const deleteDocument = async (id: number) => {
-    if (!id) {
-      console.error('Cannot delete document: id is missing');
+  const deleteDocument = async (id: number | undefined) => {
+    console.log('Attempting to delete document with id:', id);
+    if (id === undefined || id === null || isNaN(id)) {
+      console.error('Cannot delete document: id is missing or invalid');
       return;
     }
     try {
@@ -450,11 +451,11 @@ export default function KnowledgeBasePage() {
               const categoryInfo = getCategoryInfo("other")
               const fileType = doc.filename.endsWith(".pdf") ? "pdf" :
                               doc.filename.endsWith(".md") ? "markdown" : "txt"
-              const isExpanded = expandedDoc === doc.id.toString()
+              const isExpanded = expandedDoc === doc.id?.toString()
 
               return (
                 <Card
-                  key={doc.id}
+                  key={doc.id || Math.random()}
                   sx={{
                     bgcolor: 'background.paper',
                     borderRadius: 2,
@@ -481,7 +482,7 @@ export default function KnowledgeBasePage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Button
                           size="small"
-                          onClick={() => setExpandedDoc(isExpanded ? null : doc.id.toString())}
+                          onClick={() => setExpandedDoc(isExpanded ? null : doc.id?.toString())}
                           endIcon={isExpanded ? <ExpandLess /> : <ExpandMore />}
                         >
                           {isExpanded ? "Hide" : "Show"} Details
@@ -492,7 +493,8 @@ export default function KnowledgeBasePage() {
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => deleteDocument(doc.id)}
+                          onClick={() => doc.id && deleteDocument(doc.id)}
+                          disabled={!doc.id}
                         >
                           <Delete />
                         </IconButton>

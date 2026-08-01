@@ -4,17 +4,19 @@ import { buildBackendUrl } from '@/lib/backend-config';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Try to get auth header from Fabric Gateway (optional)
     const authHeader = getFabricAuthHeader(request);
     console.log('Document Delete API - Auth header present:', !!authHeader);
 
-    const documentId = params.id;
+    const { id: documentId } = await params;
+    console.log(`[Proxy] DELETE /api/documents/${documentId}`);
 
     // Build backend URL using centralized configuration
     const backendUrl = buildBackendUrl(`/documents/${documentId}`);
+    console.log(`[Proxy] Forwarding DELETE to: ${backendUrl}`);
 
     const headers: HeadersInit = {};
 
@@ -30,6 +32,8 @@ export async function DELETE(
       method: 'DELETE',
       headers,
     });
+
+    console.log(`[Proxy] Backend responded with status: ${backendResponse.status}`);
 
     if (!backendResponse.ok) {
       const errorText = await backendResponse.text();
