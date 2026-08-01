@@ -14,6 +14,7 @@ import org.springframework.ai.bedrock.titan.api.TitanEmbeddingBedrockApi.TitanEm
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +30,8 @@ import software.amazon.awssdk.regions.Region;
  */
 @Configuration
 @EnableConfigurationProperties({RagProviderProperties.class})
-@Profile("!test") // Exclude from test profile
+@Profile("!test")
+@ConditionalOnProperty(name = "rag.provider", havingValue = "bedrock", matchIfMissing = true)
 @RequiredArgsConstructor
 @Slf4j
 public class BedrockConfiguration {

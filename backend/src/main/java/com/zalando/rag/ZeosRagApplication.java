@@ -15,9 +15,12 @@ import org.springframework.core.env.Environment;
 public class ZeosRagApplication {
 
   private final Environment environment;
+  private final RagProviderProperties ragProviderProperties;
 
-  public ZeosRagApplication(Environment environment) {
+  public ZeosRagApplication(
+      Environment environment, RagProviderProperties ragProviderProperties) {
     this.environment = environment;
+    this.ragProviderProperties = ragProviderProperties;
   }
 
   public static void main(String[] args) {
@@ -27,21 +30,30 @@ public class ZeosRagApplication {
   @EventListener(ApplicationReadyEvent.class)
   public void onApplicationReady() {
     String[] activeProfiles = environment.getActiveProfiles();
-    log.info("=== ZEOS RAG APPLICATION STARTED (BEDROCK) ===");
+    String activeProvider = ragProviderProperties.getProvider();
+    RagProviderProperties.ProviderConfig providerConfig = getProviderConfig(activeProvider);
+
+    log.info("=== ZEOS RAG APPLICATION STARTED ({}) ===", activeProvider.toUpperCase());
     log.info(
-        "Active profiles: {}",
-        activeProfiles.length > 0 ? String.join(", ", activeProfiles) : "default");
+       "Active profiles: {}",
+       activeProfiles.length > 0 ? String.join(", ", activeProfiles) : "default");
 
-    // Log AWS Bedrock configuration
-    String region = environment.getProperty("spring.ai.bedrock.aws.region");
-    String chatModel = environment.getProperty("spring.ai.bedrock.converse.chat.options.model");
-    String embeddingModel = environment.getProperty("spring.ai.bedrock.embedding.options.model");
-    String dimensions = environment.getProperty("spring.ai.bedrock.embedding.options.dimensions");
-
-    log.info("AWS Bedrock region: {}", region);
-    log.info("Chat model: {}", chatModel);
-    log.info("Embedding model: {}", embeddingModel);
-    log.info("Embedding dimensions: {}", dimensions);
+    log.info("Active provider: {}", activeProvider);
+    log.info("Chat model: {}", providerConfig.getModels().getChat());
+    log.info("Embedding model: {}", providerConfig.getModels().getEmbedding());
+    log.info("Embedding dimensions: {}", providerConfig.getDimensions());
+    log.info("Region: {}", providerConfig.getRegion());
     log.info("=============================================");
+  }
+
+  private RagProviderProperties.ProviderConfig getProviderConfig(String provider) {
+    if (provider == null) {
+     return ragProviderProperties.getProviders().getZllm();
+    }
+    return switch (provider.toLowerCase()) {
+     case "bedrock" -> ragProviderProperties.getProviders().getBedrock();
+     case "zllm" -> ragProviderProperties.getProviders().getZllm();
+     default -> ragProviderProperties.getProviders().getZllm();
+    };
   }
 }
