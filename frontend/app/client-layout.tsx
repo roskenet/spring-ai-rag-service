@@ -93,7 +93,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   }}
                 />
                 <Typography variant="h6" component="span" sx={{ fontWeight: 700 }}>
-                  ZEOS Knowledge
+                  Alchemistic Knowledge
                 </Typography>
               </Box>
             </Link>
