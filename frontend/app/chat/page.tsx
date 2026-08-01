@@ -19,7 +19,7 @@ export default function ChatPage() {
       id: "0",
       role: "assistant",
       content:
-        "Hello! I'm your ZEOS Knowledge assistant. Ask me any questions about your knowledge base, and I'll search through your documents to find accurate answers.",
+        "Hello! I'm your Knowledge assistant. Ask me any questions about your knowledge base, and I'll search through your documents to find accurate answers.",
       timestamp: new Date(),
     },
   ])
