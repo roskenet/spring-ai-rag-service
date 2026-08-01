@@ -1,0 +1,37 @@
+spring:
+  autoconfigure:
+    exclude:
+      # Disable Bedrock auto-configurations when using ZLLM
+      - org.springframework.ai.model.bedrock.converse.autoconfigure.BedrockConverseAutoConfiguration
+      - org.springframework.ai.model.bedrock.titan.autoconfigure.BedrockTitanEmbeddingAutoConfiguration
+      - org.springframework.ai.model.bedrock.cohere.autoconfigure.BedrockCohereEmbeddingAutoConfiguration
+  ai:
+    openai:
+      base-url: https://zllm.data.zalan.do/v1
+      api-key: ${ZTOKEN}
+      chat:
+        options:
+          model: gpt-4o
+          temperature: 0.7
+          max-tokens: 4096
+      embedding:
+        options:
+          model: text-embedding-3-small
+    vectorstore:
+      pgvector:
+        dimensions: 1536  # OpenAI embeddings are 1536-dim (vs 1024 for Titan)
+
+rag:
+  provider: zllm
+  providers:
+    zllm:
+      enabled: true
+      models:
+        chat: gpt-4o
+        embedding: text-embedding-3-small
+      dimensions: 1536
+
+logging:
+  level:
+    org.springframework.ai.openai: DEBUG
+    com.zalando.rag: DEBUG

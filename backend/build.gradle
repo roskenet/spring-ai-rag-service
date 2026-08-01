@@ -79,9 +79,12 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-markdown-document-reader'
     implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
 
-    // AWS Bedrock support - single provider architecture
+    // AWS Bedrock support
     implementation 'org.springframework.ai:spring-ai-starter-model-bedrock-converse'
     implementation 'org.springframework.ai:spring-ai-starter-model-bedrock'
+
+    // ZLLM (OpenAI-compatible proxy) support
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
     runtimeOnly 'org.postgresql:postgresql'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
