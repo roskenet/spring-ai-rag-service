@@ -122,6 +122,11 @@ rag:
         overlap-size: 200
 ```
 
+## Configure your AWS access
+Environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION)
+Or AWS credentials file (~/.aws/credentials)
+The region must match where you requested model access.
+
 ## Performance and Monitoring
 
 We included benchmarking tools because performance matters:
