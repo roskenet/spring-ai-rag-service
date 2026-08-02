@@ -232,12 +232,14 @@ docker run -d \
 
 Start the backend:
 
+In the <ROOT>/backend folder:
 ```shell
 ZTOKEN=$(ztoken) SPRING_PROFILES_ACTIVE=zllm ./gradlew bootRun
 ```
 
-Start the frontend:
+Start the frontend (in <ROOT>/frontend):
 ```shell
+npm install
 npm run dev
 ```
 
